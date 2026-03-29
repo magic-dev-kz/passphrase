@@ -1,5 +1,38 @@
 # Changelog
 
+## v6.0.0 (2026-03-29)
+
+### UX Animations & Polish
+
+**Generate Blur-to-Reveal Animation**
+- Password text plays a blur(10px) -> blur(0) unlock animation (0.5s) after typewriter completes
+- Password container flashes with accent-colored border glow on each generation
+- Both animations respect `prefers-reduced-motion`
+
+**Copy Green Glow**
+- On successful copy, the password display container pulses with a green glow border (1.5s)
+- Green glow keyframe animation on border-color and box-shadow
+- Complements existing button flash and toast feedback
+
+**Focus-Visible Styles**
+- All interactive elements have explicit `:focus-visible` outlines
+- Primary buttons: white outline + accent glow ring
+- Secondary buttons, tabs, toggles, chips: accent outline + subtle glow
+- Danger button: red outline + red glow ring
+- Inputs (checker, custom words): accent border + glow shadow
+- History items, close buttons, eye toggle: accent outline
+- Range sliders: accent outline with offset
+
+**Mode Switch Crossfade**
+- Switching between Phrase/Classic/PIN uses opacity crossfade (0.2s)
+- Old panel fades out with slight downward drift, new panel fades in
+- Falls back to instant toggle when `prefers-reduced-motion` is active
+
+### Technical
+- Service worker cache bumped to `passphrase-v6.0`
+
+---
+
 ## v5.0.0 (2026-03-29)
 
 ### New Features

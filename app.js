@@ -1,7 +1,8 @@
 /**
- * PassPhrase v5 — Password Generator
+ * PassPhrase v6 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
+ * v6: generate unlock animation, copy glow, crossfade tabs
  */
 (function () {
   'use strict';
@@ -186,6 +187,20 @@
     return result;
   }
 
+  // v6: Display flash on generate
+  var $passwordDisplay = document.querySelector('.password-display');
+
+  function triggerDisplayFlash() {
+    if (!$passwordDisplay) return;
+    $passwordDisplay.classList.remove('password-display--flash');
+    void $passwordDisplay.offsetWidth;
+    $passwordDisplay.classList.add('password-display--flash');
+    $passwordDisplay.addEventListener('animationend', function handler() {
+      $passwordDisplay.removeEventListener('animationend', handler);
+      $passwordDisplay.classList.remove('password-display--flash');
+    });
+  }
+
   function generate() {
     cancelAutoClear();
     switch (currentMode) {
@@ -194,6 +209,7 @@
       case 'pin': currentPassword = generatePin(); break;
     }
     typePassword(currentPassword);
+    triggerDisplayFlash();
     updateShield(currentPassword);
     updateStrengthMeter(currentPassword);
     updateBreachWarning(currentPassword);
@@ -201,7 +217,7 @@
     addToHistory(currentPassword);
   }
 
-  // === Typewriter effect ===
+  // === Typewriter effect with v6 unlock animation ===
   function typePassword(text) {
     if (typingTimer) {
       clearInterval(typingTimer);
@@ -214,6 +230,8 @@
       return;
     }
 
+    // v6: blur → reveal unlock animation
+    $passwordText.classList.remove('password-text--unlocking');
     $passwordText.textContent = '';
     $passwordText.classList.add('password-text--typing');
 
@@ -228,6 +246,12 @@
         clearInterval(typingTimer);
         typingTimer = null;
         $passwordText.classList.remove('password-text--typing');
+        // v6: trigger unlock reveal
+        $passwordText.classList.add('password-text--unlocking');
+        $passwordText.addEventListener('animationend', function handler() {
+          $passwordText.removeEventListener('animationend', handler);
+          $passwordText.classList.remove('password-text--unlocking');
+        });
       }
     }, interval);
   }
@@ -480,6 +504,16 @@
         button.classList.add('btn--copied');
         setTimeout(() => button.classList.remove('btn--copied'), 1200);
       }
+      // v6: green glow on password container
+      if ($passwordDisplay) {
+        $passwordDisplay.classList.remove('password-display--copy-glow');
+        void $passwordDisplay.offsetWidth;
+        $passwordDisplay.classList.add('password-display--copy-glow');
+        $passwordDisplay.addEventListener('animationend', function glowHandler() {
+          $passwordDisplay.removeEventListener('animationend', glowHandler);
+          $passwordDisplay.classList.remove('password-display--copy-glow');
+        });
+      }
       showCopyToast();
       scheduleClipboardClear();
     }
@@ -705,6 +739,12 @@
   // === Tab switching ===
   function switchMode(mode) {
     if (mode === currentMode) return;
+
+    // v6: crossfade settings panels (0.2s opacity)
+    var panels = { phrase: $settingsPhrase, classic: $settingsClassic, pin: $settingsPin };
+    var oldPanel = panels[currentMode];
+    var newPanel = panels[mode];
+
     currentMode = mode;
 
     $$('.tab').forEach(t => {
@@ -714,9 +754,29 @@
       t.setAttribute('tabindex', isActive ? '0' : '-1');
     });
 
-    $settingsPhrase.classList.toggle('hidden', mode !== 'phrase');
-    $settingsClassic.classList.toggle('hidden', mode !== 'classic');
-    $settingsPin.classList.toggle('hidden', mode !== 'pin');
+    // Skip crossfade if reduced motion or panels missing
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !oldPanel || !newPanel) {
+      $settingsPhrase.classList.toggle('hidden', mode !== 'phrase');
+      $settingsClassic.classList.toggle('hidden', mode !== 'classic');
+      $settingsPin.classList.toggle('hidden', mode !== 'pin');
+      generate();
+      return;
+    }
+
+    // Fade out old panel
+    oldPanel.classList.add('settings--fade-out');
+    setTimeout(function() {
+      oldPanel.classList.add('hidden');
+      oldPanel.classList.remove('settings--fade-out');
+
+      // Show and fade in new panel
+      newPanel.classList.remove('hidden');
+      newPanel.classList.add('settings--fade-in');
+      newPanel.addEventListener('animationend', function fadeHandler() {
+        newPanel.removeEventListener('animationend', fadeHandler);
+        newPanel.classList.remove('settings--fade-in');
+      });
+    }, 200);
 
     generate();
   }

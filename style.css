@@ -1,5 +1,6 @@
-/* === PassPhrase v5 — Designed by Sky === */
+/* === PassPhrase v6 — Designed by Sky === */
 /* Deep security aesthetic with glassmorphism & cyber glow */
+/* v6: generate blur→reveal, copy glow, crossfade tabs */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
@@ -323,14 +324,42 @@ body::before {
 @keyframes password-reveal {
   0% {
     opacity: 0;
-    filter: blur(8px);
-    transform: scale(0.95);
+    filter: blur(12px);
+    transform: scale(0.92);
+  }
+  40% {
+    opacity: 0.6;
+    filter: blur(4px);
+    transform: scale(0.98);
   }
   100% {
     opacity: 1;
     filter: blur(0);
     transform: scale(1);
   }
+}
+
+/* v6: Generate unlock animation */
+@keyframes generate-unlock {
+  0%   { filter: blur(10px); opacity: 0.3; }
+  30%  { filter: blur(6px);  opacity: 0.5; }
+  60%  { filter: blur(2px);  opacity: 0.8; }
+  100% { filter: blur(0);    opacity: 1;   }
+}
+
+.password-text--unlocking {
+  animation: generate-unlock 0.5s var(--ease-out) both;
+}
+
+/* v6: Password display flash on generate */
+@keyframes display-flash {
+  0%   { border-color: var(--glass-border-c); box-shadow: 0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 var(--glass-shine); }
+  40%  { border-color: rgba(var(--accent-rgb), 0.4); box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 30px rgba(var(--accent-rgb), 0.15), inset 0 1px 0 var(--glass-shine); }
+  100% { border-color: var(--glass-border-c); box-shadow: 0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 var(--glass-shine); }
+}
+
+.password-display--flash {
+  animation: display-flash 0.6s var(--ease-out);
 }
 
 /* Typewriter cursor */
@@ -547,6 +576,57 @@ body::before {
   0% { transform: scale(1); }
   30% { transform: scale(1.05); }
   100% { transform: scale(1); }
+}
+
+/* v6: Copy confirmation green glow */
+@keyframes copy-glow {
+  0%   { box-shadow: 0 0 0 rgba(var(--green-rgb), 0); }
+  30%  { box-shadow: 0 0 24px rgba(var(--green-rgb), 0.4), 0 0 48px rgba(var(--green-rgb), 0.15); }
+  100% { box-shadow: 0 4px 20px rgba(var(--green-rgb), 0.35); }
+}
+
+.btn--copied {
+  animation: copy-flash 0.4s var(--ease-spring), copy-glow 0.6s var(--ease-out);
+}
+
+/* v6: Copy confirmation green glow on password container */
+@keyframes container-copy-glow {
+  0%   { border-color: var(--glass-border-c); box-shadow: 0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 var(--glass-shine); }
+  25%  { border-color: rgba(var(--green-rgb), 0.5); box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 24px rgba(var(--green-rgb), 0.3), 0 0 48px rgba(var(--green-rgb), 0.1), inset 0 1px 0 var(--glass-shine); }
+  100% { border-color: var(--glass-border-c); box-shadow: 0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 var(--glass-shine); }
+}
+
+.password-display--copy-glow {
+  animation: container-copy-glow 1.5s var(--ease-out);
+}
+
+/* v6: Copy toast green glow pulse */
+.copy-toast.show {
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.25),
+    0 0 24px rgba(var(--green-rgb), 0.2),
+    0 0 48px rgba(var(--green-rgb), 0.08);
+  border-color: rgba(var(--green-rgb), 0.35);
+}
+
+/* v6: Mode switch crossfade (0.2s) */
+.settings {
+  transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+
+.settings--fade-out {
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+}
+
+.settings--fade-in {
+  animation: settings-fade-in 0.2s var(--ease-out) both;
+}
+
+@keyframes settings-fade-in {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* === Settings panel === */
@@ -972,7 +1052,7 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 20px;
 }
 
-/* === Focus visible === */
+/* === Focus visible (v6: all interactive elements) === */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -981,6 +1061,87 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn--primary:focus-visible {
+  outline: 2px solid #FFF;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0.25),
+              0 4px 20px rgba(var(--accent-rgb), 0.3);
+}
+
+.btn--secondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.15);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.15);
+}
+
+.setting-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.12);
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.history-close:focus-visible,
+.checker__eye:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.history-item__copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.history-item__password:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.copy-toast__keep:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.btn--danger:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.15);
+}
+
+.checker__input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15),
+              0 0 16px rgba(var(--accent-rgb), 0.15);
+}
+
+.custom-words__input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
 }
 
 /* === Footer === */
