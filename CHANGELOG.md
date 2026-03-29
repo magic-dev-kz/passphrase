@@ -1,5 +1,11 @@
 # Changelog
 
+## v15.0.0 (2026-03-29)
+- **Password pronunciation**: In Classic mode, shows phonetic pronunciation below the password (e.g., "xK9m" becomes "Ex-Kay-nine-em"). Maps each character to its NATO/phonetic name. Uppercase letters get capitalized pronunciation. Truncated at 30 chars with ellipsis
+- Service worker cache bumped to `passphrase-v15.0`
+
+---
+
 ## v14.0.0 (2026-03-29)
 - **Password expiry reminder**: Optional toggle "Remind me to change in 90 days" below the generate button. Stores generation timestamp in localStorage. On next visit after 90+ days, a fixed red/orange banner warns the password is stale with dismiss option. Timestamp resets on each generation when enabled
 - Service worker cache bumped to `passphrase-v14.0`

@@ -1,5 +1,5 @@
 /**
- * PassPhrase v14 — Password Generator
+ * PassPhrase v15 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
@@ -257,6 +257,7 @@
     updateBreachWarning(currentPassword);
     updateScoreBadge(currentPassword);
     updatePhoneticHint(currentPassword); // v8
+    updatePronunciation(currentPassword); // v15
     updateCrackEstimate(currentPassword); // v8
     updateEntropyChart(currentPassword); // v12: entropy visualization
     startPasswordAgeTimer(); // v13: password aging warning
@@ -1148,6 +1149,49 @@
     } else {
       $hint.classList.add('hidden');
     }
+  }
+
+  // === v15: Password Pronunciation (Classic mode) ===
+  var CHAR_PHONETICS = {
+    'a':'ay','b':'bee','c':'see','d':'dee','e':'ee','f':'eff','g':'jee','h':'aitch',
+    'i':'eye','j':'jay','k':'kay','l':'ell','m':'em','n':'en','o':'oh','p':'pee',
+    'q':'cue','r':'ar','s':'ess','t':'tee','u':'you','v':'vee','w':'dub','x':'ex',
+    'y':'why','z':'zee',
+    '0':'zero','1':'one','2':'two','3':'three','4':'four','5':'five',
+    '6':'six','7':'seven','8':'eight','9':'nine',
+    '!':'bang','@':'at','#':'hash','$':'dollar','%':'percent','^':'caret',
+    '&':'and','*':'star','(':'open',')'  :'close','-':'dash','_':'under',
+    '=':'equals','+':'plus','[':'bracket',']':'bracket','{':'brace','}':'brace',
+    '|':'pipe',';':'semi',':':'colon',',':'comma','.':'dot','<':'less','>':'greater',
+    '?':'question'
+  };
+
+  function updatePronunciation(password) {
+    var $el = document.getElementById('pronunciation-hint');
+    if (currentMode !== 'classic' || !password) {
+      if ($el) $el.style.display = 'none';
+      return;
+    }
+    if (!$el) {
+      $el = document.createElement('div');
+      $el.id = 'pronunciation-hint';
+      $el.style.cssText = 'font-size:.78rem;color:var(--muted,#888);padding:6px 0;margin-top:4px;font-family:var(--font-mono,monospace);word-break:break-all;text-align:center;';
+      var display = document.querySelector('.password-display');
+      if (display && display.parentNode) {
+        display.parentNode.insertBefore($el, display.nextSibling);
+      } else return;
+    }
+    $el.style.display = '';
+    var parts = [];
+    for (var i = 0; i < password.length && i < 30; i++) {
+      var ch = password[i];
+      var lower = ch.toLowerCase();
+      var phonetic = CHAR_PHONETICS[lower] || ch;
+      // Capitalize first letter for uppercase chars
+      if (ch >= 'A' && ch <= 'Z') phonetic = phonetic.charAt(0).toUpperCase() + phonetic.slice(1);
+      parts.push(phonetic);
+    }
+    $el.textContent = '\u{1F524} ' + parts.join('-') + (password.length > 30 ? '...' : '');
   }
 
   // === v8: Time to Crack Estimate ===
