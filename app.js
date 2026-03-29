@@ -497,6 +497,12 @@
     $strengthLabel.textContent = label;
     $strengthLabel.style.color = color;
     $strengthBits.textContent = entropy + ' bits';
+    // v17: update strength meter ARIA
+    var $meter = document.getElementById('strength-meter');
+    if ($meter) {
+      $meter.setAttribute('aria-valuenow', Math.round(pct));
+      $meter.setAttribute('aria-valuetext', label + ', ' + entropy + ' bits');
+    }
   }
 
   // === Breach Pattern Check ===

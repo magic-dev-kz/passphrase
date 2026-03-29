@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a href="#password-text" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999;padding:8px 16px;background:#7C5CFC;color:#fff;font-size:14px;font-weight:600;text-decoration:none;border-radius:0 0 8px 0;" onfocus="this.style.position='fixed';this.style.left='0';this.style.top='0';this.style.width='auto';this.style.height='auto';" onblur="this.style.position='absolute';this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
 
 <!-- Onboarding overlay (first visit) -->
 <div class="onboarding-overlay" id="onboarding-overlay">
@@ -72,7 +73,7 @@
   </div>
 
   <!-- Strength Meter -->
-  <div class="strength-meter" id="strength-meter">
+  <div class="strength-meter" id="strength-meter" role="meter" aria-label="Password strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Weak">
     <div class="strength-meter__bar-track">
       <div class="strength-meter__bar-fill" id="strength-bar"></div>
     </div>

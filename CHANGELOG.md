@@ -1,5 +1,14 @@
 # Changelog
 
+## v17.0 (2026-03-29) — Accessibility Pass
+
+- **Skip link**: Hidden skip-to-content link appears on Tab for keyboard users, jumps to password display
+- **Password display aria-live**: Already has `aria-live="polite"` (preserved from earlier version)
+- **Strength meter aria-label**: Meter element gets `role="meter"` with dynamic `aria-valuenow` and `aria-valuetext` (e.g. "Strong, 78 bits")
+- SW cache bumped to `passphrase-v17.0`
+
+---
+
 ## v16.0 (2026-03-29) — Select All on Double-Click
 
 - **Double-click to select all**: Double-clicking the password output selects the entire password (prevents partial selection)
