@@ -1,9 +1,10 @@
 /**
- * PassPhrase v7 — Password Generator
+ * PassPhrase v8 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
  * v7: PWA install banner, Space shortcut, remember settings
+ * v8: phonetic hint, crack estimate, compare mode
  */
 (function () {
   'use strict';
@@ -215,6 +216,8 @@
     updateStrengthMeter(currentPassword);
     updateBreachWarning(currentPassword);
     updateScoreBadge(currentPassword);
+    updatePhoneticHint(currentPassword); // v8
+    updateCrackEstimate(currentPassword); // v8
     addToHistory(currentPassword);
     if (typeof saveSettings === 'function') saveSettings(); // v7: persist settings
   }
@@ -1016,6 +1019,122 @@
       .slice(0, 20);
   }
 
+  // === v8: Phonetic Hint ===
+  function updatePhoneticHint(password) {
+    var $hint = document.getElementById('phonetic-hint');
+    var $text = document.getElementById('phonetic-text');
+    if (!$hint || !$text) return;
+
+    if (currentMode === 'phrase' && password) {
+      // Extract words from the passphrase by splitting on the separator
+      var sep = phraseSettings.separator;
+      var parts = sep ? password.split(sep) : [password];
+      // Filter out pure numbers and symbols
+      var wordParts = parts.filter(function(p) { return /[a-zA-Z\u0400-\u04FF]/.test(p); });
+      if (wordParts.length > 0) {
+        $text.textContent = wordParts.join('-').toLowerCase();
+        $hint.classList.remove('hidden');
+      } else {
+        $hint.classList.add('hidden');
+      }
+    } else {
+      $hint.classList.add('hidden');
+    }
+  }
+
+  // === v8: Time to Crack Estimate ===
+  function updateCrackEstimate(password) {
+    var $el = document.getElementById('crack-estimate');
+    if (!$el) return;
+
+    var entropy = calculateEntropy(password);
+    // 2^entropy / 10^12 guesses per sec = seconds to crack
+    var totalGuesses = Math.pow(2, entropy);
+    var guessesPerSec = 1e12; // trillion guesses/sec
+    var seconds = totalGuesses / guessesPerSec;
+
+    var timeStr;
+    if (seconds < 1) timeStr = 'less than a second';
+    else if (seconds < 60) timeStr = Math.ceil(seconds) + ' seconds';
+    else if (seconds < 3600) timeStr = Math.ceil(seconds / 60) + ' minutes';
+    else if (seconds < 86400) timeStr = Math.ceil(seconds / 3600) + ' hours';
+    else if (seconds < 86400 * 365) timeStr = Math.ceil(seconds / 86400) + ' days';
+    else {
+      var years = seconds / (86400 * 365);
+      if (years < 1000) timeStr = Math.ceil(years) + ' years';
+      else if (years < 1e6) timeStr = (years / 1000).toFixed(0) + ' thousand years';
+      else if (years < 1e9) timeStr = (years / 1e6).toFixed(0) + ' million years';
+      else if (years < 1e12) timeStr = (years / 1e9).toFixed(0) + ' billion years';
+      else timeStr = 'trillions of years';
+    }
+
+    $el.textContent = 'Would take ~' + timeStr + ' to crack (at 1 trillion guesses/sec)';
+  }
+
+  // === v8: Compare Mode ===
+  function openCompare() {
+    var $overlay = document.getElementById('compare-overlay');
+    var $cards = document.getElementById('compare-cards');
+    if (!$overlay || !$cards) return;
+
+    // Generate one of each type
+    var savedMode = currentMode;
+
+    // Phrase
+    currentMode = 'phrase';
+    var phrasePassword = generatePhrase();
+    var phraseEntropy = calculateEntropy(phrasePassword);
+
+    // Classic
+    currentMode = 'classic';
+    var classicPassword = generateClassic();
+    var classicEntropy = (function() {
+      var cs = 0;
+      if (/[a-z]/.test(classicPassword)) cs += 26;
+      if (/[A-Z]/.test(classicPassword)) cs += 26;
+      if (/[0-9]/.test(classicPassword)) cs += 10;
+      if (/[^a-zA-Z0-9]/.test(classicPassword)) cs += 32;
+      if (cs === 0) cs = 26;
+      return Math.floor(classicPassword.length * Math.log2(cs));
+    })();
+
+    // PIN
+    currentMode = 'pin';
+    var pinPassword = generatePin();
+    var pinEntropy = Math.floor(pinSettings.length * Math.log2(10));
+
+    // Restore mode
+    currentMode = savedMode;
+
+    var items = [
+      { mode: 'Phrase', password: phrasePassword, entropy: phraseEntropy },
+      { mode: 'Classic', password: classicPassword, entropy: classicEntropy },
+      { mode: 'PIN', password: pinPassword, entropy: pinEntropy }
+    ];
+
+    var html = '';
+    items.forEach(function(item) {
+      var score = calculateScore(item.entropy);
+      var color = getScoreColor(score);
+      var pct = Math.min(100, (item.entropy / 120) * 100);
+      html += '<div class="compare-card">' +
+        '<div class="compare-card__mode">' + item.mode + '</div>' +
+        '<div class="compare-card__password">' + escapeAttr(item.password) + '</div>' +
+        '<div class="compare-card__stats">' +
+        '<div class="compare-card__bar-track"><div class="compare-card__bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+        '<div class="compare-card__score" style="color:' + color + '">' + score + '/100</div>' +
+        '<span>' + item.entropy + ' bits</span>' +
+        '</div></div>';
+    });
+    $cards.innerHTML = html;
+    $overlay.classList.add('open');
+  }
+
+  function closeCompare() {
+    var $overlay = document.getElementById('compare-overlay');
+    if ($overlay) $overlay.classList.remove('open');
+  }
+
   // === Event listeners ===
   function bindEvents() {
     // Tabs
@@ -1052,6 +1171,20 @@
     // Copy
     $btnCopy.addEventListener('click', () => copyToClipboard(currentPassword, $btnCopy));
 
+    // v8: Compare
+    var $btnCompare = document.getElementById('btn-compare');
+    if ($btnCompare) {
+      $btnCompare.addEventListener('click', openCompare);
+    }
+    var $compareClose = document.getElementById('compare-close');
+    if ($compareClose) {
+      $compareClose.addEventListener('click', closeCompare);
+    }
+    var $compareBackdrop = document.getElementById('compare-backdrop');
+    if ($compareBackdrop) {
+      $compareBackdrop.addEventListener('click', closeCompare);
+    }
+
     // Theme
     $themeToggle.addEventListener('click', toggleTheme);
 
@@ -1087,6 +1220,11 @@
     // Keyboard
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        var $compareOverlay = document.getElementById('compare-overlay');
+        if ($compareOverlay && $compareOverlay.classList.contains('open')) {
+          closeCompare();
+          return;
+        }
         var $transferOverlay = document.getElementById('transfer-overlay');
         if ($transferOverlay && $transferOverlay.classList.contains('open')) {
           closeTransfer();

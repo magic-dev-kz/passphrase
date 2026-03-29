@@ -1,5 +1,33 @@
 # Changelog
 
+## v8.0.0 (2026-03-29)
+
+### New Features
+
+**Password Pronounceability (Phrase Mode)**
+- Shows a "Sounds like:" phonetic hint below the strength meter for Phrase passwords
+- Extracts word parts from the passphrase and joins them with hyphens for easy reading
+- Automatically hidden for Classic and PIN modes
+- Helps users remember and verbally communicate their passphrases
+
+**Time to Crack Estimate**
+- Displays "Would take ~X years to crack" below the strength meter
+- Calculation based on entropy: 2^entropy / 10^12 guesses per second
+- Updates with each generated password
+- Shows human-readable time ranges from "less than a second" to "trillions of years"
+
+**Password Comparison Mode**
+- New "Compare" button next to Generate
+- Opens a modal showing 3 passwords side-by-side: Phrase, Classic, and PIN
+- Each card displays the password, strength bar, score (out of 100), and entropy bits
+- Helps users understand the relative strength of different password types
+- Closable via button, backdrop click, or Escape key
+
+### Technical
+- Service worker cache bumped to `passphrase-v8.0`
+
+---
+
 ## v7.0.0 (2026-03-30)
 
 ### New Features

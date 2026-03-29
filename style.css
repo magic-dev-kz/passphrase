@@ -1,7 +1,8 @@
-/* === PassPhrase v7 — Designed by Sky === */
+/* === PassPhrase v8 — Designed by Sky === */
 /* Deep security aesthetic with glassmorphism & cyber glow */
 /* v6: generate blur→reveal, copy glow, crossfade tabs */
 /* v7: PWA install banner, Space shortcut, remember settings */
+/* v8: phonetic hint, crack estimate, compare mode */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
@@ -1775,6 +1776,172 @@ button:focus-visible {
   font-size: 12px;
   color: var(--text-muted);
   margin-top: var(--spacing-md);
+}
+
+/* === v8: Phonetic Hint === */
+.phonetic-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 8px 14px;
+  margin-bottom: var(--spacing-sm);
+  background: var(--accent-bg);
+  border: 1px solid rgba(var(--accent-rgb), 0.15);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  animation: breach-fade-in 0.3s var(--ease-out);
+}
+
+.phonetic-hint__label {
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.phonetic-hint__text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  word-break: break-all;
+  color: var(--text-primary);
+}
+
+/* === v8: Crack Estimate === */
+.crack-estimate {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+.crack-estimate:empty {
+  display: none;
+}
+
+/* === v8: Compare Overlay === */
+.compare-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.compare-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.compare-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.compare-dialog {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-c);
+  border-radius: 20px;
+  padding: var(--spacing-lg);
+  width: 100%;
+  max-width: 420px;
+  transform: scale(0.9);
+  transition: transform var(--duration-med) var(--ease-spring);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+.compare-overlay.open .compare-dialog {
+  transform: scale(1);
+}
+
+.compare-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.compare-dialog__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.compare-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.compare-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--glass-border-c);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compare-card__mode {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+}
+
+.compare-card__password {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-all;
+  line-height: 1.5;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.compare-card__stats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.compare-card__bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.compare-card__bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s var(--ease-out);
+}
+
+.compare-card__score {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
 }
 
 /* === Reduced motion === */

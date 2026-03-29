@@ -65,6 +65,15 @@
     </div>
   </div>
 
+  <!-- v8: Phonetic hint (Phrase mode) -->
+  <div class="phonetic-hint hidden" id="phonetic-hint" aria-live="polite">
+    <span class="phonetic-hint__label">Sounds like:</span>
+    <span class="phonetic-hint__text" id="phonetic-text"></span>
+  </div>
+
+  <!-- v8: Time to crack estimate -->
+  <div class="crack-estimate" id="crack-estimate" aria-live="polite"></div>
+
   <!-- Shield -->
   <div class="shield-container">
     <div class="shield" id="shield" data-level="1" aria-hidden="true">
@@ -105,6 +114,10 @@
     <button class="btn btn--primary" id="btn-generate" aria-label="Generate new password">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
       Generate
+    </button>
+    <button class="btn btn--secondary" id="btn-compare" aria-label="Compare password types">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Compare
     </button>
     <button class="btn btn--secondary" id="btn-copy" aria-label="Copy to clipboard">
       <span class="btn__icon-copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
@@ -236,6 +249,18 @@
   </footer>
 
 </div><!-- .app -->
+
+<!-- v8: Compare modal -->
+<div class="compare-overlay" id="compare-overlay" role="dialog" aria-modal="true" aria-label="Password comparison">
+  <div class="compare-backdrop" id="compare-backdrop"></div>
+  <div class="compare-dialog">
+    <div class="compare-dialog__header">
+      <span class="compare-dialog__title">Compare Passwords</span>
+      <button class="history-close" id="compare-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="compare-cards" id="compare-cards"></div>
+  </div>
+</div>
 
 <!-- Transfer modal -->
 <div class="transfer-overlay" id="transfer-overlay" role="dialog" aria-modal="true" aria-label="Password transfer">
