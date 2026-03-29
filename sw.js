@@ -1,4 +1,4 @@
-const CACHE = 'passphrase-v2.1';
+const CACHE = 'passphrase-v4.0';
 const ASSETS = ['./', './index.html', './style.css', './app.js', './words-en.js', './words-ru.js'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));

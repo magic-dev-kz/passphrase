@@ -13,6 +13,9 @@
 <meta name="twitter:title" content="PassPhrase — Password Generator">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -41,6 +44,17 @@
   <!-- Password display -->
   <div class="password-display" role="region" aria-label="Generated password">
     <div class="password-text" id="password-text" aria-live="polite"></div>
+  </div>
+
+  <!-- Strength Meter -->
+  <div class="strength-meter" id="strength-meter">
+    <div class="strength-meter__bar-track">
+      <div class="strength-meter__bar-fill" id="strength-bar"></div>
+    </div>
+    <div class="strength-meter__info">
+      <span class="strength-meter__label" id="strength-label">Weak</span>
+      <span class="strength-meter__bits" id="strength-bits"></span>
+    </div>
   </div>
 
   <!-- Shield -->
@@ -119,6 +133,23 @@
         <button class="setting-chip" data-lang="ru">Russian</button>
       </div>
     </div>
+    <div class="setting-row setting-row--custom-words">
+      <div class="custom-words">
+        <div class="custom-words__header">
+          <span class="setting-label">Custom words</span>
+          <span class="custom-words__count" id="custom-words-count">0/20</span>
+        </div>
+        <textarea class="custom-words__input" id="custom-words-input" placeholder="Add your words, comma-separated (max 20)..." rows="2" spellcheck="false"></textarea>
+        <div class="custom-words__actions">
+          <button class="setting-chip" id="custom-words-save" type="button">Save</button>
+          <button class="setting-chip" id="custom-words-clear" type="button">Clear</button>
+          <label class="custom-words__toggle-label">
+            <button class="toggle" id="toggle-custom-words" role="switch" aria-checked="false" aria-label="Use custom words in generation"></button>
+            <span class="setting-label">Use</span>
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Classic settings -->
@@ -191,7 +222,10 @@
 
 <!-- Copy toast -->
 <div class="copy-toast" id="copy-toast" aria-live="polite">
-  <span class="copy-toast__text">Copied! Auto-clears in <span id="toast-countdown">30</span>s</span>
+  <div class="copy-toast__content">
+    <span class="copy-toast__text">Copied! Auto-clears in <span id="toast-countdown">30</span>s</span>
+    <button class="copy-toast__keep" id="toast-keep" aria-label="Keep password, cancel auto-clear">Keep</button>
+  </div>
   <div class="copy-toast__bar" id="toast-bar"></div>
 </div>
 

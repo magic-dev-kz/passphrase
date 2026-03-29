@@ -38,6 +38,8 @@
 
   // === State ===
   let currentMode = 'phrase'; // phrase | classic | pin
+  let customWords = []; // user-defined words for phrase mode (max 20)
+  let useCustomWords = false;
   let phraseSettings = {
     wordCount: 4,
     separator: '-',
@@ -83,6 +85,11 @@
   const $confirmOverlay = $('#confirm-overlay');
   const $confirmYes = $('#confirm-yes');
   const $confirmNo = $('#confirm-no');
+
+  // Strength meter
+  const $strengthBar = $('#strength-bar');
+  const $strengthLabel = $('#strength-label');
+  const $strengthBits = $('#strength-bits');
 
   // Classic settings
   const $classicSlider = $('#classic-length');
@@ -134,7 +141,12 @@
 
   // === Password Generation ===
   function generatePhrase() {
-    const words = phraseSettings.language === 'en' ? WORDS_EN : WORDS_RU;
+    let words;
+    if (useCustomWords && customWords.length >= 2) {
+      words = customWords;
+    } else {
+      words = phraseSettings.language === 'en' ? WORDS_EN : WORDS_RU;
+    }
     if (!words || words.length === 0) {
       return 'error-empty-dictionary';
     }
@@ -175,6 +187,7 @@
   }
 
   function generate() {
+    cancelAutoClear();
     switch (currentMode) {
       case 'phrase': currentPassword = generatePhrase(); break;
       case 'classic': currentPassword = generateClassic(); break;
@@ -182,6 +195,7 @@
     }
     typePassword(currentPassword);
     updateShield(currentPassword);
+    updateStrengthMeter(currentPassword);
     addToHistory(currentPassword);
   }
 
@@ -225,7 +239,12 @@
     if (/[^a-zA-Z0-9]/.test(password)) charsetSize += 32;
     // For passphrases, calculate based on word count from dictionary
     if (currentMode === 'phrase') {
-      const words = phraseSettings.language === 'en' ? WORDS_EN : WORDS_RU;
+      var words;
+      if (useCustomWords && customWords.length >= 2) {
+        words = customWords;
+      } else {
+        words = phraseSettings.language === 'en' ? WORDS_EN : WORDS_RU;
+      }
       const dictSize = words.length;
       let bits = phraseSettings.wordCount * Math.log2(dictSize);
       if (phraseSettings.addNumber) bits += Math.log2(90); // 10-99
@@ -307,9 +326,44 @@
     $shieldTime.textContent = '~' + getCrackTime(entropy) + ' brute-force (' + entropy + ' bits)';
   }
 
+  // === Strength Meter ===
+  function updateStrengthMeter(password) {
+    const entropy = calculateEntropy(password);
+    let pct, label, color;
+
+    if (entropy < 30) {
+      pct = Math.max(5, (entropy / 30) * 20);
+      label = 'Weak';
+      color = '#ff4757';
+    } else if (entropy < 50) {
+      pct = 20 + ((entropy - 30) / 20) * 20;
+      label = 'Fair';
+      color = '#ffa502';
+    } else if (entropy < 70) {
+      pct = 40 + ((entropy - 50) / 20) * 20;
+      label = 'Good';
+      color = '#ffd32a';
+    } else if (entropy < 90) {
+      pct = 60 + ((entropy - 70) / 20) * 20;
+      label = 'Strong';
+      color = '#00e68a';
+    } else {
+      pct = Math.min(100, 80 + ((entropy - 90) / 40) * 20);
+      label = 'Very Strong';
+      color = '#00d4aa';
+    }
+
+    $strengthBar.style.width = pct + '%';
+    $strengthBar.style.background = color;
+    $strengthLabel.textContent = label;
+    $strengthLabel.style.color = color;
+    $strengthBits.textContent = entropy + ' bits';
+  }
+
   // === Copy with auto-clear ===
   let clipboardClearTimer = null;
   let toastCountdownTimer = null;
+  let autoClearTimer = null;
 
   function copyToClipboard(text, button) {
     if (!text) return;
@@ -352,6 +406,7 @@
 
     // Reset
     if (toastCountdownTimer) clearInterval(toastCountdownTimer);
+    if (autoClearTimer) clearTimeout(autoClearTimer);
     $toast.classList.add('show');
     $bar.classList.remove('animating');
     $bar.style.width = '100%';
@@ -364,6 +419,16 @@
     $bar.style.transitionDuration = '30s';
     $bar.style.width = '0%';
 
+    // Schedule auto-clear of the password result after 30s
+    autoClearTimer = setTimeout(() => {
+      currentPassword = '';
+      $passwordText.textContent = '';
+      $strengthBar.style.width = '0%';
+      $strengthLabel.textContent = '';
+      $strengthBits.textContent = '';
+      autoClearTimer = null;
+    }, 30000);
+
     toastCountdownTimer = setInterval(() => {
       remaining--;
       $countdown.textContent = remaining;
@@ -374,6 +439,25 @@
         $bar.classList.remove('animating');
       }
     }, 1000);
+  }
+
+  function cancelAutoClear() {
+    var $toast = document.getElementById('copy-toast');
+    var $bar = document.getElementById('toast-bar');
+    if (autoClearTimer) {
+      clearTimeout(autoClearTimer);
+      autoClearTimer = null;
+    }
+    if (toastCountdownTimer) {
+      clearInterval(toastCountdownTimer);
+      toastCountdownTimer = null;
+    }
+    if ($toast) {
+      $toast.classList.remove('show');
+    }
+    if ($bar) {
+      $bar.classList.remove('animating');
+    }
   }
 
   // === History (session-only — never stored in localStorage) ===
@@ -703,6 +787,61 @@
     $details.textContent = info;
   }
 
+  // === Custom Words ===
+  function initCustomWords() {
+    const $input = $('#custom-words-input');
+    const $count = $('#custom-words-count');
+    const $save = $('#custom-words-save');
+    const $clear = $('#custom-words-clear');
+    const $toggleUse = $('#toggle-custom-words');
+    if (!$input) return;
+
+    // Load from localStorage if available
+    try {
+      const saved = localStorage.getItem('pp-custom-words');
+      if (saved) {
+        $input.value = saved;
+        parseCustomWords(saved);
+        $count.textContent = customWords.length + '/20';
+      }
+    } catch (e) { /* ignore */ }
+
+    $input.addEventListener('input', () => {
+      parseCustomWords($input.value);
+      $count.textContent = customWords.length + '/20';
+    });
+
+    $save.addEventListener('click', () => {
+      parseCustomWords($input.value);
+      $count.textContent = customWords.length + '/20';
+      try { localStorage.setItem('pp-custom-words', $input.value); } catch (e) { /* ignore */ }
+      if (useCustomWords && currentMode === 'phrase') generate();
+    });
+
+    $clear.addEventListener('click', () => {
+      $input.value = '';
+      customWords = [];
+      $count.textContent = '0/20';
+      try { localStorage.removeItem('pp-custom-words'); } catch (e) { /* ignore */ }
+      if (useCustomWords && currentMode === 'phrase') generate();
+    });
+
+    $toggleUse.addEventListener('click', () => {
+      useCustomWords = !useCustomWords;
+      $toggleUse.classList.toggle('active', useCustomWords);
+      $toggleUse.setAttribute('aria-checked', useCustomWords);
+      if (currentMode === 'phrase') generate();
+    });
+  }
+
+  function parseCustomWords(text) {
+    customWords = text
+      .split(',')
+      .map(w => w.trim().toLowerCase())
+      .filter(w => w.length > 0)
+      .slice(0, 20);
+  }
+
   // === Event listeners ===
   function bindEvents() {
     // Tabs
@@ -742,6 +881,12 @@
     // Theme
     $themeToggle.addEventListener('click', toggleTheme);
 
+    // Keep button (cancel auto-clear)
+    var $toastKeep = $('#toast-keep');
+    if ($toastKeep) {
+      $toastKeep.addEventListener('click', cancelAutoClear);
+    }
+
     // History
     $historyToggle.addEventListener('click', openHistory);
     $historyClose.addEventListener('click', closeHistory);
@@ -770,6 +915,7 @@
     initPhraseSettings();
     initClassicSettings();
     initPinSettings();
+    initCustomWords();
     initChecker();
     bindEvents();
     generate(); // AC-1: auto-generate on open
