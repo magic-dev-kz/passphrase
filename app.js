@@ -1441,6 +1441,19 @@
     bindEvents();
     initPWAInstallBanner();
     generate(); // AC-1: auto-generate on open
+
+    // v10: First-visit tooltip
+    (function() {
+      var tipKey = 'passphrase_tip_shown';
+      try { if (localStorage.getItem(tipKey)) return; } catch(e) { return; }
+      localStorage.setItem(tipKey, '1');
+      var tip = document.createElement('div');
+      tip.textContent = 'Press Space to generate';
+      tip.style.cssText = 'text-align:center;font-size:14px;color:var(--text-secondary);margin-top:12px;opacity:1;transition:opacity 0.4s ease;';
+      var btn = document.getElementById('btn-generate');
+      if (btn && btn.parentNode) btn.parentNode.insertBefore(tip, btn.nextSibling);
+      setTimeout(function() { tip.style.opacity = '0'; setTimeout(function() { tip.remove(); }, 400); }, 5000);
+    })();
   }
 
   // === Clipboard security: clear on tab close / hide ===

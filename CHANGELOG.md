@@ -1,5 +1,12 @@
 # Changelog
 
+## v10.0.0 (2026-03-29)
+- First-visit tooltip "Press Space to generate" shown once after init, auto-fades after 5s
+- Password font size slightly larger (28px to 30px) for readability
+- Service worker cache bumped to `passphrase-v10.0`
+
+---
+
 ## v9.0.0 (2026-03-29)
 
 ### Visual Identity Upgrade (Leo 5.5 -> 9/10)
