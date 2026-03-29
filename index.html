@@ -21,6 +21,23 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- Onboarding overlay (first visit) -->
+<div class="onboarding-overlay" id="onboarding-overlay">
+  <div class="onboarding-backdrop"></div>
+  <div class="onboarding-card">
+    <div class="onboarding-icon">&#x1f6e1;&#xfe0f;</div>
+    <h2 class="onboarding-title">PassPhrase</h2>
+    <p class="onboarding-tagline">Generate secure passwords in seconds</p>
+    <ul class="onboarding-features">
+      <li class="onboarding-feature" style="animation-delay:.15s">Passphrases you can actually remember</li>
+      <li class="onboarding-feature" style="animation-delay:.3s">Breach pattern detection</li>
+      <li class="onboarding-feature" style="animation-delay:.45s">Works offline, never leaves your browser</li>
+    </ul>
+    <button class="onboarding-cta" id="onboarding-cta">Generate My First Password &rarr;</button>
+  </div>
+</div>
+
 <div class="app">
 
   <!-- Header -->

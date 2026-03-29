@@ -1,5 +1,13 @@
 # Changelog
 
+## v11.0.0 (2026-03-29)
+- **Onboarding overlay**: First-visit glassmorphism overlay with app title, tagline, 3 feature highlights (staggered fade-in), and "Generate My First Password" CTA
+- CTA dismisses overlay, sets localStorage flag (`passphrase_onboarded`), and auto-generates first password
+- Dark glass card with teal accent glow, `prefers-reduced-motion` safe
+- Service worker cache bumped to `passphrase-v11.0`
+
+---
+
 ## v10.0.0 (2026-03-29)
 - First-visit tooltip "Press Space to generate" shown once after init, auto-fades after 5s
 - Password font size slightly larger (28px to 30px) for readability

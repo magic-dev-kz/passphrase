@@ -1471,10 +1471,34 @@
     }
   });
 
+  // === Onboarding overlay (first visit) ===
+  function initOnboarding() {
+    var ONBOARD_KEY = 'passphrase_onboarded';
+    var overlay = document.getElementById('onboarding-overlay');
+    var cta = document.getElementById('onboarding-cta');
+    if (!overlay || !cta) return;
+    var seen = false;
+    try { seen = localStorage.getItem(ONBOARD_KEY) === '1'; } catch(e) {}
+    if (seen) {
+      overlay.remove();
+      return;
+    }
+    overlay.style.display = '';
+    cta.addEventListener('click', function() {
+      overlay.classList.add('hidden');
+      try { localStorage.setItem(ONBOARD_KEY, '1'); } catch(e) {}
+      setTimeout(function() { overlay.remove(); }, 450);
+      // Trigger first password generation
+      var btn = document.getElementById('btn-generate');
+      if (btn) btn.click();
+    });
+  }
+
   // Wait for DOM + word lists
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function() { init(); initOnboarding(); });
   } else {
     init();
+    initOnboarding();
   }
 })();
