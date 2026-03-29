@@ -1,5 +1,11 @@
 # Changelog
 
+## v13.0.0 (2026-03-29)
+- **Password aging warning**: Timer shows "Generated X minutes ago" next to the password. Turns yellow after 5 minutes, red after 30 minutes with "Consider generating a new one" message. Resets on new generation, clears on auto-clear
+- Service worker cache bumped to `passphrase-v13.0`
+
+---
+
 ## v12.0.0 (2026-03-29)
 - **Generate sound**: Soft click/tick sound via Web Audio API (1ms square wave burst at 1800Hz) plays on each password generation. Respects `prefers-reduced-motion`
 - **Password length recommendation**: "Recommended: 4+ words for most uses" hint text shown below the word count selector in Phrase mode

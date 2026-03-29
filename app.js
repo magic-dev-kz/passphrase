@@ -1,5 +1,5 @@
 /**
- * PassPhrase v12 — Password Generator
+ * PassPhrase v13 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
@@ -7,6 +7,7 @@
  * v8: phonetic hint, crack estimate, compare mode
  * v9: VISUAL IDENTITY — generate animation, copy pulse, shield glow
  * v12: generate click sound, password length recommendation, entropy visualization
+ * v13: password aging warning — shows time since generation, yellow after 5min, red after 30min
  */
 (function () {
   'use strict';
@@ -65,6 +66,8 @@
   let currentPassword = '';
   let history = [];
   let typingTimer = null;
+  let passwordAgeTimer = null;
+  let passwordGeneratedAt = null;
 
   // === DOM refs ===
   const $ = (sel) => document.querySelector(sel);
@@ -256,8 +259,72 @@
     updatePhoneticHint(currentPassword); // v8
     updateCrackEstimate(currentPassword); // v8
     updateEntropyChart(currentPassword); // v12: entropy visualization
+    startPasswordAgeTimer(); // v13: password aging warning
     addToHistory(currentPassword);
     if (typeof saveSettings === 'function') saveSettings(); // v7: persist settings
+  }
+
+  // === v13: Password Aging Warning ===
+  function startPasswordAgeTimer() {
+    passwordGeneratedAt = Date.now();
+    if (passwordAgeTimer) clearInterval(passwordAgeTimer);
+    updatePasswordAge();
+    passwordAgeTimer = setInterval(updatePasswordAge, 10000); // update every 10s
+  }
+
+  function stopPasswordAgeTimer() {
+    if (passwordAgeTimer) {
+      clearInterval(passwordAgeTimer);
+      passwordAgeTimer = null;
+    }
+    passwordGeneratedAt = null;
+    var ageEl = document.getElementById('password-age');
+    if (ageEl) {
+      ageEl.style.display = 'none';
+      ageEl.textContent = '';
+    }
+  }
+
+  function updatePasswordAge() {
+    if (!passwordGeneratedAt || !currentPassword) return;
+    var ageEl = document.getElementById('password-age');
+    if (!ageEl) {
+      // Create the element next to password display
+      ageEl = document.createElement('div');
+      ageEl.id = 'password-age';
+      ageEl.style.cssText = 'text-align:center;font-size:13px;margin-top:6px;padding:4px 10px;border-radius:8px;transition:color 0.3s,background 0.3s;font-weight:500;';
+      var passwordDisplay = document.querySelector('.password-display') || $passwordText.parentNode;
+      if (passwordDisplay && passwordDisplay.parentNode) {
+        passwordDisplay.parentNode.insertBefore(ageEl, passwordDisplay.nextSibling);
+      }
+    }
+    var elapsed = Date.now() - passwordGeneratedAt;
+    var seconds = Math.floor(elapsed / 1000);
+    var minutes = Math.floor(seconds / 60);
+    var label;
+    if (seconds < 60) {
+      label = 'Generated ' + seconds + 's ago';
+    } else {
+      label = 'Generated ' + minutes + 'm ago';
+    }
+
+    ageEl.style.display = '';
+    if (minutes >= 30) {
+      // Red: strongly suggest regeneration
+      ageEl.textContent = label + ' — Consider generating a new one';
+      ageEl.style.color = '#E53E3E';
+      ageEl.style.background = 'rgba(229,62,62,0.08)';
+    } else if (minutes >= 5) {
+      // Yellow: aging warning
+      ageEl.textContent = label;
+      ageEl.style.color = '#D69E2E';
+      ageEl.style.background = 'rgba(214,158,46,0.08)';
+    } else {
+      // Normal: just info
+      ageEl.textContent = label;
+      ageEl.style.color = 'var(--text-secondary, #888)';
+      ageEl.style.background = 'transparent';
+    }
   }
 
   // === Typewriter effect with v6 unlock animation ===
@@ -612,6 +679,7 @@
       $strengthBar.style.width = '0%';
       $strengthLabel.textContent = '';
       $strengthBits.textContent = '';
+      stopPasswordAgeTimer(); // v13
       autoClearTimer = null;
     }, 30000);
 
