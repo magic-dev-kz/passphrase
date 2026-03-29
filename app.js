@@ -1,8 +1,9 @@
 /**
- * PassPhrase v6 — Password Generator
+ * PassPhrase v7 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
+ * v7: PWA install banner, Space shortcut, remember settings
  */
 (function () {
   'use strict';
@@ -215,6 +216,7 @@
     updateBreachWarning(currentPassword);
     updateScoreBadge(currentPassword);
     addToHistory(currentPassword);
+    if (typeof saveSettings === 'function') saveSettings(); // v7: persist settings
   }
 
   // === Typewriter effect with v6 unlock animation ===
@@ -1094,12 +1096,189 @@
           closeHistory();
         }
       }
+      // v7: Space = generate new password (when not in input/textarea)
+      if (e.key === ' ' || e.code === 'Space') {
+        var tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        var isInput = tag === 'input' || tag === 'textarea' || tag === 'select' || document.activeElement.isContentEditable;
+        if (!isInput) {
+          e.preventDefault();
+          generate();
+        }
+      }
     });
+  }
+
+  // === v7: Remember Settings ===
+  function saveSettings() {
+    try {
+      localStorage.setItem('pp-settings', JSON.stringify({
+        mode: currentMode,
+        phrase: phraseSettings,
+        classic: classicSettings,
+        pin: pinSettings
+      }));
+    } catch (e) { /* ignore */ }
+  }
+
+  function restoreSettings() {
+    try {
+      var saved = localStorage.getItem('pp-settings');
+      if (!saved) return;
+      var s = JSON.parse(saved);
+
+      // Restore phrase settings
+      if (s.phrase) {
+        if (typeof s.phrase.wordCount === 'number') phraseSettings.wordCount = s.phrase.wordCount;
+        if (typeof s.phrase.separator === 'string') phraseSettings.separator = s.phrase.separator;
+        if (typeof s.phrase.addNumber === 'boolean') phraseSettings.addNumber = s.phrase.addNumber;
+        if (typeof s.phrase.addSpecial === 'boolean') phraseSettings.addSpecial = s.phrase.addSpecial;
+        if (s.phrase.language === 'en' || s.phrase.language === 'ru') phraseSettings.language = s.phrase.language;
+      }
+
+      // Restore classic settings
+      if (s.classic) {
+        if (typeof s.classic.length === 'number') classicSettings.length = s.classic.length;
+        if (typeof s.classic.upper === 'boolean') classicSettings.upper = s.classic.upper;
+        if (typeof s.classic.lower === 'boolean') classicSettings.lower = s.classic.lower;
+        if (typeof s.classic.digits === 'boolean') classicSettings.digits = s.classic.digits;
+        if (typeof s.classic.symbols === 'boolean') classicSettings.symbols = s.classic.symbols;
+      }
+
+      // Restore pin settings
+      if (s.pin) {
+        if (typeof s.pin.length === 'number') pinSettings.length = s.pin.length;
+      }
+
+      // Apply to UI — phrase
+      $$('[data-word-count]').forEach(function(c) {
+        c.classList.toggle('active', parseInt(c.dataset.wordCount) === phraseSettings.wordCount);
+      });
+      $$('[data-separator]').forEach(function(c) {
+        c.classList.toggle('active', c.dataset.separator === phraseSettings.separator);
+      });
+      var $toggleNum = $('#toggle-number');
+      $toggleNum.classList.toggle('active', phraseSettings.addNumber);
+      $toggleNum.setAttribute('aria-checked', phraseSettings.addNumber);
+      var $toggleSpec = $('#toggle-special');
+      $toggleSpec.classList.toggle('active', phraseSettings.addSpecial);
+      $toggleSpec.setAttribute('aria-checked', phraseSettings.addSpecial);
+      $$('[data-lang]').forEach(function(c) {
+        c.classList.toggle('active', c.dataset.lang === phraseSettings.language);
+      });
+
+      // Apply to UI — classic
+      $classicSlider.value = classicSettings.length;
+      $classicValue.textContent = classicSettings.length;
+      var classicToggles = { 'toggle-upper': 'upper', 'toggle-lower': 'lower', 'toggle-digits': 'digits', 'toggle-symbols': 'symbols' };
+      Object.entries(classicToggles).forEach(function(entry) {
+        var el = $('#' + entry[0]);
+        el.classList.toggle('active', classicSettings[entry[1]]);
+        el.setAttribute('aria-checked', classicSettings[entry[1]]);
+      });
+
+      // Apply to UI — pin
+      $pinSlider.value = pinSettings.length;
+      $pinValue.textContent = pinSettings.length;
+
+      // Restore mode (switch tab)
+      if (s.mode && s.mode !== 'phrase') {
+        currentMode = s.mode;
+        $$('.tab').forEach(function(t) {
+          var isActive = t.dataset.mode === s.mode;
+          t.classList.toggle('active', isActive);
+          t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          t.setAttribute('tabindex', isActive ? '0' : '-1');
+        });
+        $settingsPhrase.classList.toggle('hidden', s.mode !== 'phrase');
+        $settingsClassic.classList.toggle('hidden', s.mode !== 'classic');
+        $settingsPin.classList.toggle('hidden', s.mode !== 'pin');
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  // === v7: PWA Install Prompt ===
+  var deferredInstallPrompt = null;
+
+  function initPWAInstallBanner() {
+    // Track visits
+    var visits = 1;
+    try {
+      visits = parseInt(localStorage.getItem('pp-visits') || '0') + 1;
+      localStorage.setItem('pp-visits', String(visits));
+    } catch (e) { /* ignore */ }
+
+    // Don't show if already dismissed or installed
+    try {
+      if (localStorage.getItem('pp-pwa-dismissed')) return;
+    } catch (e) { /* ignore */ }
+
+    // Need 2+ visits
+    if (visits < 2) return;
+
+    // Already in standalone mode = already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
+
+    // Listen for beforeinstallprompt
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      showInstallBanner();
+    });
+  }
+
+  function showInstallBanner() {
+    // Create banner
+    var banner = document.createElement('div');
+    banner.className = 'pwa-install-banner';
+    banner.id = 'pwa-install-banner';
+    banner.setAttribute('role', 'alert');
+    banner.innerHTML =
+      '<div class="pwa-install-banner__icon">' +
+        '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>' +
+      '</div>' +
+      '<div class="pwa-install-banner__text">' +
+        '<div class="pwa-install-banner__title">Install PassPhrase</div>' +
+        '<div class="pwa-install-banner__sub">Add to Home Screen for quick access</div>' +
+      '</div>' +
+      '<button class="pwa-install-banner__btn" id="pwa-install-btn">Install</button>' +
+      '<button class="pwa-install-banner__close" id="pwa-install-close" aria-label="Dismiss">&times;</button>';
+    document.body.appendChild(banner);
+
+    // Show with animation
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        banner.classList.add('show');
+      });
+    });
+
+    document.getElementById('pwa-install-btn').addEventListener('click', function() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then(function() {
+          deferredInstallPrompt = null;
+          dismissInstallBanner();
+        });
+      }
+    });
+
+    document.getElementById('pwa-install-close').addEventListener('click', function() {
+      dismissInstallBanner();
+      try { localStorage.setItem('pp-pwa-dismissed', '1'); } catch (e) { /* ignore */ }
+    });
+  }
+
+  function dismissInstallBanner() {
+    var banner = document.getElementById('pwa-install-banner');
+    if (banner) {
+      banner.classList.remove('show');
+      setTimeout(function() { if (banner.parentNode) banner.remove(); }, 400);
+    }
   }
 
   // === Init ===
   function init() {
     initTheme();
+    restoreSettings();
     // history lives only in memory — no loadHistory() from localStorage
     initPhraseSettings();
     initClassicSettings();
@@ -1107,6 +1286,7 @@
     initCustomWords();
     initChecker();
     bindEvents();
+    initPWAInstallBanner();
     generate(); // AC-1: auto-generate on open
   }
 

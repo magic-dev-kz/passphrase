@@ -1,5 +1,31 @@
 # Changelog
 
+## v7.0.0 (2026-03-30)
+
+### New Features
+
+**PWA Install Prompt**
+- Shows an install banner after 2+ visits to the app
+- Uses the `beforeinstallprompt` event for native install flow
+- Dismissible with close button; dismiss state persisted in localStorage
+- Does not show if app is already installed (standalone mode detected)
+
+**Keyboard Shortcut: Space to Generate**
+- Pressing Space generates a new password when focus is not in an input/textarea
+- Works globally on the page; `e.preventDefault()` avoids page scroll
+- Does not interfere with typing in the checker input or custom words textarea
+
+**Remember Settings**
+- Selected mode (Phrase/Classic/PIN), all phrase options (word count, separator, add number, add symbol, language), classic options (length, upper/lower/digits/symbols), and PIN length are saved to localStorage
+- Settings restored on page load before first generation
+- UI controls (chips, toggles, sliders, tabs) are synced to the restored values
+- Saved on every generation to capture the latest changes
+
+### Technical
+- Service worker cache bumped to `passphrase-v7.0`
+
+---
+
 ## v6.0.0 (2026-03-29)
 
 ### UX Animations & Polish

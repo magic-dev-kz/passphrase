@@ -1,6 +1,7 @@
-/* === PassPhrase v6 — Designed by Sky === */
+/* === PassPhrase v7 — Designed by Sky === */
 /* Deep security aesthetic with glassmorphism & cyber glow */
 /* v6: generate blur→reveal, copy glow, crossfade tabs */
+/* v7: PWA install banner, Space shortcut, remember settings */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
@@ -1142,6 +1143,110 @@ button:focus-visible {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+}
+
+/* === PWA Install Banner (v7) === */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 250;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-top: 1px solid var(--glass-border-c);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  padding: 14px var(--spacing-md);
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(100%);
+  transition: transform var(--duration-med) var(--ease-out);
+}
+
+.pwa-install-banner.show {
+  transform: translateY(0);
+}
+
+.pwa-install-banner__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), rgba(var(--green-rgb), 0.85));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.25);
+}
+
+.pwa-install-banner__icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.pwa-install-banner__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-install-banner__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pwa-install-banner__sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.pwa-install-banner__btn {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 17px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), rgba(var(--green-rgb), 0.85));
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--duration-fast) var(--ease-out);
+  box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.3);
+}
+
+.pwa-install-banner__btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.4);
+}
+
+.pwa-install-banner__close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.pwa-install-banner__close:hover {
+  background: var(--accent-bg);
+  color: var(--text-secondary);
 }
 
 /* === Footer === */
