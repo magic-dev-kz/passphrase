@@ -1,8 +1,9 @@
-/* === PassPhrase v8 — Designed by Sky === */
+/* === PassPhrase v9 — Designed by Sky === */
 /* Deep security aesthetic with glassmorphism & cyber glow */
 /* v6: generate blur→reveal, copy glow, crossfade tabs */
 /* v7: PWA install banner, Space shortcut, remember settings */
 /* v8: phonetic hint, crack estimate, compare mode */
+/* v9: VISUAL IDENTITY — security color system, shield glow, generate animation, glassmorphism cards */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
@@ -17,25 +18,35 @@
   --text-primary:    #e8ecf4;
   --text-secondary:  #8a9bb5;
   --text-muted:      #5a6a82;
-  --accent:          #00d4aa;
+  --accent:          #00D4AA;
   --accent-rgb:      0, 212, 170;
   --accent-bg:       rgba(0, 212, 170, 0.1);
   --accent-glow:     0 0 20px rgba(0, 212, 170, 0.15);
-  --green:           #00e68a;
-  --green-rgb:       0, 230, 138;
-  --red:             #ff4757;
-  --orange:          #ffa502;
-  --yellow:          #ffd32a;
-  --purple:          #c56cf0;
-  --cyan:            #00d4aa;
+  --secondary:       #3B82F6;
+  --secondary-rgb:   59, 130, 246;
+  --green:           #22C55E;
+  --green-rgb:       34, 197, 94;
+  --red:             #EF4444;
+  --red-rgb:         239, 68, 68;
+  --orange:          #F59E0B;
+  --yellow:          #EAB308;
+  --purple:          #A855F7;
+  --cyan:            #00D4AA;
   --gray:            rgba(100, 120, 150, 0.3);
 
-  /* Shield level colors */
-  --shield-1:        #ff4757;
-  --shield-2:        #ffa502;
-  --shield-3:        #ffd32a;
-  --shield-4:        #00e68a;
-  --shield-5:        #c56cf0;
+  /* Shield level colors — 5 distinct strength tiers */
+  --shield-1:        #EF4444;
+  --shield-2:        #F59E0B;
+  --shield-3:        #EAB308;
+  --shield-4:        #22C55E;
+  --shield-5:        #A855F7;
+
+  /* Shield glow intensities per level */
+  --shield-glow-1:   0 0 8px rgba(239, 68, 68, 0.3);
+  --shield-glow-2:   0 0 12px rgba(245, 158, 11, 0.35);
+  --shield-glow-3:   0 0 14px rgba(234, 179, 8, 0.35);
+  --shield-glow-4:   0 0 18px rgba(34, 197, 94, 0.4);
+  --shield-glow-5:   0 0 24px rgba(168, 85, 247, 0.5);
 
   --font-mono:       'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace;
   --font-sans:       'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -82,6 +93,12 @@
   --accent-rgb:      0, 168, 133;
   --accent-bg:       rgba(0, 168, 133, 0.08);
   --accent-glow:     0 0 20px rgba(0, 168, 133, 0.1);
+  --secondary:       #2563EB;
+  --secondary-rgb:   37, 99, 235;
+  --green:           #16A34A;
+  --green-rgb:       22, 163, 74;
+  --red:             #DC2626;
+  --red-rgb:         220, 38, 38;
   --gray:            rgba(150, 165, 185, 0.3);
   --yellow:          #b8860b;
   --shield-3:        #b8860b;
@@ -105,6 +122,12 @@
     --accent-rgb:      0, 168, 133;
     --accent-bg:       rgba(0, 168, 133, 0.08);
     --accent-glow:     0 0 20px rgba(0, 168, 133, 0.1);
+    --secondary:       #2563EB;
+    --secondary-rgb:   37, 99, 235;
+    --green:           #16A34A;
+    --green-rgb:       22, 163, 74;
+    --red:             #DC2626;
+    --red-rgb:         220, 38, 38;
     --gray:            rgba(150, 165, 185, 0.3);
     --yellow:          #b8860b;
     --shield-3:        #b8860b;
@@ -135,16 +158,24 @@ body {
   overflow-x: hidden;
 }
 
-/* Subtle grid pattern overlay */
+/* v9: Deep background with subtle teal radial glows */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(circle at 20% 30%, rgba(var(--accent-rgb), 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(var(--green-rgb), 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse 600px 400px at 15% 20%, rgba(var(--accent-rgb), 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 500px at 85% 75%, rgba(var(--secondary-rgb), 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 50% 50%, rgba(var(--accent-rgb), 0.03) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
+  animation: bg-glow-drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes bg-glow-drift {
+  0%   { opacity: 0.8; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.85; }
 }
 
 /* === App container === */
@@ -266,13 +297,15 @@ body::before {
 
 .tab:hover:not(.active) {
   color: var(--text-primary);
-  background: rgba(var(--accent-rgb), 0.05);
+  background: rgba(var(--accent-rgb), 0.08);
+  transform: translateY(-1px);
 }
 
 .tab.active {
-  background: linear-gradient(135deg, var(--accent), rgba(var(--green-rgb), 0.85));
+  background: linear-gradient(135deg, var(--accent) 0%, var(--secondary) 100%);
   color: #FFFFFF;
-  box-shadow: 0 2px 12px rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 2px 16px rgba(var(--accent-rgb), 0.35), 0 0 20px rgba(var(--secondary-rgb), 0.15);
+  transform: translateY(-1px);
 }
 
 /* === Password display === */
@@ -442,25 +475,58 @@ body::before {
   transform: translateY(0);
 }
 
-/* Level 5 glow */
-.shield[data-level="5"] {
-  filter: drop-shadow(0 0 12px rgba(197, 108, 240, 0.5));
-  animation: shield-glow 2s ease-in-out infinite alternate;
+/* v9: Shield glow per level — distinct color + intensity */
+.shield[data-level="1"] {
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.25));
 }
 
-@keyframes shield-glow {
-  from { filter: drop-shadow(0 0 8px rgba(197, 108, 240, 0.4)); }
-  to   { filter: drop-shadow(0 0 20px rgba(197, 108, 240, 0.7)); }
+.shield[data-level="2"] {
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.3));
+}
+
+.shield[data-level="3"] {
+  filter: drop-shadow(0 0 12px rgba(234, 179, 8, 0.35));
+}
+
+.shield[data-level="4"] {
+  filter: drop-shadow(0 0 16px rgba(34, 197, 94, 0.4));
+  animation: shield-glow-green 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes shield-glow-green {
+  from { filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.3)); }
+  to   { filter: drop-shadow(0 0 22px rgba(34, 197, 94, 0.55)); }
+}
+
+.shield[data-level="5"] {
+  filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.5));
+  animation: shield-glow-legendary 2s ease-in-out infinite alternate;
+}
+
+@keyframes shield-glow-legendary {
+  from { filter: drop-shadow(0 0 14px rgba(168, 85, 247, 0.4)); }
+  to   { filter: drop-shadow(0 0 28px rgba(168, 85, 247, 0.7)); }
+}
+
+/* v9: Pulsing animation on shield when strong (level 4-5) */
+.shield[data-level="4"] svg,
+.shield[data-level="5"] svg {
+  animation: shield-breathe 3s ease-in-out infinite;
+}
+
+@keyframes shield-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
 }
 
 /* Level pulse animation on change */
 .shield--pulse {
-  animation: shield-pulse 0.4s var(--ease-spring);
+  animation: shield-pulse 0.5s var(--ease-spring);
 }
 
 @keyframes shield-pulse {
   0%   { transform: scale(1); }
-  50%  { transform: scale(1.15); }
+  40%  { transform: scale(1.18); }
   100% { transform: scale(1); }
 }
 
@@ -536,8 +602,20 @@ body::before {
 }
 
 .btn--primary:active {
-  transform: scale(0.97) translateY(0);
+  transform: scale(0.93) translateY(0);
   box-shadow: 0 2px 12px rgba(var(--accent-rgb), 0.25);
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+}
+
+/* v9: Generate button ripple animation */
+@keyframes generate-ripple {
+  0%   { transform: scale(0.93); box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.4); }
+  40%  { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(var(--accent-rgb), 0); }
+  100% { transform: scale(1); box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.3); }
+}
+
+.btn--primary.btn--generating {
+  animation: generate-ripple 0.5s var(--ease-spring);
 }
 
 .btn--secondary {
@@ -631,7 +709,7 @@ body::before {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* === Settings panel === */
+/* === Settings panel — v9: enhanced glassmorphism === */
 .settings {
   background: var(--glass-bg);
   border-radius: 20px;
@@ -640,6 +718,23 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  border: 1px solid var(--glass-border-c);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 var(--glass-shine),
+    inset 0 0 0 1px rgba(var(--accent-rgb), 0.03);
+  transition: border-color var(--duration-med) var(--ease-out),
+              box-shadow var(--duration-med) var(--ease-out),
+              opacity 0.2s var(--ease-out),
+              transform 0.2s var(--ease-out);
+}
+
+.settings:hover {
+  border-color: rgba(var(--accent-rgb), 0.15);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(var(--accent-rgb), 0.06),
+    inset 0 1px 0 var(--glass-shine);
 }
 
 .setting-row {
@@ -685,11 +780,11 @@ body::before {
 }
 
 .setting-chip.active {
-  background: linear-gradient(135deg, var(--accent), rgba(var(--green-rgb), 0.85));
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
   border-color: transparent;
   color: #FFFFFF;
   font-weight: 600;
-  box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.25);
+  box-shadow: 0 2px 12px rgba(var(--accent-rgb), 0.3);
 }
 
 /* Toggle switch */
@@ -725,13 +820,13 @@ body::before {
 }
 
 .toggle.active {
-  background: linear-gradient(135deg, var(--accent), rgba(var(--green-rgb), 0.85));
-  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.2);
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.25), 0 0 6px rgba(var(--secondary-rgb), 0.15);
 }
 
 .toggle.active::after {
   transform: translateX(20px);
-  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.35);
 }
 
 /* Slider (for Classic mode length) */
@@ -773,17 +868,17 @@ input[type="range"]::-webkit-slider-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--green));
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.35), 0 0 12px rgba(var(--accent-rgb), 0.2);
   transition: box-shadow var(--duration-fast) var(--ease-out),
               transform var(--duration-fast) var(--ease-out);
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 2px 16px rgba(var(--accent-rgb), 0.5);
-  transform: scale(1.1);
+  box-shadow: 0 2px 16px rgba(var(--accent-rgb), 0.5), 0 0 20px rgba(var(--accent-rgb), 0.3);
+  transform: scale(1.15);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -1491,10 +1586,21 @@ button:focus-visible {
   height: 100%;
   width: 0%;
   border-radius: 3px;
-  transition: width 0.6s var(--ease-out),
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1),
               background 0.6s var(--ease-out);
   position: relative;
   overflow: hidden;
+}
+
+/* v9: Strength meter glow effect */
+.strength-meter__bar-fill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  box-shadow: 0 0 8px currentColor;
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .strength-meter__bar-fill::after {
@@ -1944,6 +2050,67 @@ button:focus-visible {
   text-align: right;
 }
 
+/* === v9: Copy feedback — green pulse border + checkmark draw === */
+@keyframes copy-pulse-border {
+  0%   { border-color: var(--glass-border-c); box-shadow: 0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 var(--glass-shine); }
+  20%  { border-color: rgba(34, 197, 94, 0.6); box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 20px rgba(34, 197, 94, 0.3), 0 0 40px rgba(34, 197, 94, 0.1), inset 0 1px 0 var(--glass-shine); }
+  40%  { border-color: rgba(34, 197, 94, 0.3); }
+  60%  { border-color: rgba(34, 197, 94, 0.5); box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 16px rgba(34, 197, 94, 0.2), inset 0 1px 0 var(--glass-shine); }
+  100% { border-color: var(--glass-border-c); box-shadow: 0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 var(--glass-shine); }
+}
+
+.password-display--copy-pulse {
+  animation: copy-pulse-border 1.2s var(--ease-out);
+}
+
+/* v9: SVG checkmark draw animation */
+@keyframes checkmark-draw {
+  0%   { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.btn--copied .btn__icon-check svg polyline {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 0;
+  animation: checkmark-draw 0.35s var(--ease-out);
+}
+
+/* v9: Toast countdown bar with enhanced gradient */
+.copy-toast__bar.animating {
+  background: linear-gradient(90deg, var(--green), var(--accent), var(--secondary));
+}
+
+/* v9: Password display enhanced with accent border glow on hover */
+.password-display {
+  transition: border-color var(--duration-med) var(--ease-out),
+              box-shadow var(--duration-med) var(--ease-out);
+}
+
+.password-display:hover {
+  border-color: rgba(var(--accent-rgb), 0.2);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.15),
+    0 0 16px rgba(var(--accent-rgb), 0.08),
+    inset 0 1px 0 var(--glass-shine);
+}
+
+/* v9: Checker section enhanced glass */
+.checker {
+  transition: border-color var(--duration-med) var(--ease-out),
+              box-shadow var(--duration-med) var(--ease-out);
+}
+
+.checker:hover {
+  border-color: rgba(var(--accent-rgb), 0.15);
+}
+
+/* v9: Shield label enhanced */
+.shield-label {
+  transition: color var(--duration-med) var(--ease-out),
+              background var(--duration-med) var(--ease-out),
+              box-shadow var(--duration-med) var(--ease-out);
+}
+
 /* === Reduced motion === */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1952,9 +2119,13 @@ button:focus-visible {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .shield[data-level="4"],
   .shield[data-level="5"] {
     animation: none;
-    filter: drop-shadow(0 0 12px rgba(197, 108, 240, 0.5));
+  }
+  .shield[data-level="4"] svg,
+  .shield[data-level="5"] svg {
+    animation: none;
   }
   .shield--pulse {
     animation: none;
@@ -1963,7 +2134,14 @@ button:focus-visible {
     animation: none;
     opacity: 1;
   }
-  .checker__bar-fill::after {
+  .checker__bar-fill::after,
+  .strength-meter__bar-fill::after {
+    animation: none;
+  }
+  .btn--primary.btn--generating {
+    animation: none;
+  }
+  body::before {
     animation: none;
   }
 }

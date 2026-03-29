@@ -1,10 +1,11 @@
 /**
- * PassPhrase v8 — Password Generator
+ * PassPhrase v9 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
  * v7: PWA install banner, Space shortcut, remember settings
  * v8: phonetic hint, crack estimate, compare mode
+ * v9: VISUAL IDENTITY — generate animation, copy pulse, shield glow
  */
 (function () {
   'use strict';
@@ -205,6 +206,18 @@
 
   function generate() {
     cancelAutoClear();
+
+    // v9: Generate button ripple animation
+    if ($btnGenerate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      $btnGenerate.classList.remove('btn--generating');
+      void $btnGenerate.offsetWidth;
+      $btnGenerate.classList.add('btn--generating');
+      $btnGenerate.addEventListener('animationend', function genHandler() {
+        $btnGenerate.removeEventListener('animationend', genHandler);
+        $btnGenerate.classList.remove('btn--generating');
+      });
+    }
+
     switch (currentMode) {
       case 'phrase': currentPassword = generatePhrase(); break;
       case 'classic': currentPassword = generateClassic(); break;
@@ -347,13 +360,15 @@
       $check.style.opacity = (level === 2 || level === 3) ? '1' : '0';
     }
 
-    // Pulse animation
+    // v9: Pulse animation with slight delay for visual stagger
     $shieldSvg.classList.remove('shield--pulse');
     void $shieldSvg.offsetWidth;
     $shieldSvg.classList.add('shield--pulse');
 
     $shieldLabel.textContent = getShieldLabel(level);
     $shieldLabel.style.color = color;
+    // v9: Add glow to shield label based on level
+    $shieldLabel.style.textShadow = '0 0 10px ' + color + '40';
     $shieldTime.textContent = '~' + getCrackTime(entropy) + ' brute-force (' + entropy + ' bits)';
   }
 
@@ -365,23 +380,23 @@
     if (entropy < 30) {
       pct = Math.max(5, (entropy / 30) * 20);
       label = 'Weak';
-      color = '#ff4757';
+      color = '#EF4444'; // v9: danger red
     } else if (entropy < 50) {
       pct = 20 + ((entropy - 30) / 20) * 20;
       label = 'Fair';
-      color = '#ffa502';
+      color = '#F59E0B';
     } else if (entropy < 70) {
       pct = 40 + ((entropy - 50) / 20) * 20;
       label = 'Good';
-      color = '#ffd32a';
+      color = '#EAB308';
     } else if (entropy < 90) {
       pct = 60 + ((entropy - 70) / 20) * 20;
       label = 'Strong';
-      color = '#00e68a';
+      color = '#22C55E'; // v9: success green
     } else {
       pct = Math.min(100, 80 + ((entropy - 90) / 40) * 20);
       label = 'Very Strong';
-      color = '#00d4aa';
+      color = '#00D4AA'; // v9: cyber teal
     }
 
     $strengthBar.style.width = pct + '%';
@@ -459,11 +474,11 @@
   }
 
   function getScoreColor(score) {
-    if (score < 20) return '#ff4757';
-    if (score < 50) return '#ffa502';
-    if (score < 75) return '#ffd32a';
-    if (score < 90) return '#00e68a';
-    return '#00d4aa';
+    if (score < 20) return '#EF4444';
+    if (score < 50) return '#F59E0B';
+    if (score < 75) return '#EAB308';
+    if (score < 90) return '#22C55E';
+    return '#00D4AA';
   }
 
   function updateScoreBadge(password) {
@@ -509,14 +524,14 @@
         button.classList.add('btn--copied');
         setTimeout(() => button.classList.remove('btn--copied'), 1200);
       }
-      // v6: green glow on password container
+      // v9: green pulse border on password container
       if ($passwordDisplay) {
-        $passwordDisplay.classList.remove('password-display--copy-glow');
+        $passwordDisplay.classList.remove('password-display--copy-glow', 'password-display--copy-pulse');
         void $passwordDisplay.offsetWidth;
-        $passwordDisplay.classList.add('password-display--copy-glow');
+        $passwordDisplay.classList.add('password-display--copy-pulse');
         $passwordDisplay.addEventListener('animationend', function glowHandler() {
           $passwordDisplay.removeEventListener('animationend', glowHandler);
-          $passwordDisplay.classList.remove('password-display--copy-glow');
+          $passwordDisplay.classList.remove('password-display--copy-pulse');
         });
       }
       showCopyToast();

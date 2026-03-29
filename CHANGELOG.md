@@ -1,5 +1,59 @@
 # Changelog
 
+## v9.0.0 (2026-03-29)
+
+### Visual Identity Upgrade (Leo 5.5 -> 9/10)
+
+**Security-Themed Color System**
+- Primary accent: Cyber teal `#00D4AA` (security, trust)
+- Secondary accent: Electric blue `#3B82F6` for gradients and active states
+- Danger red `#EF4444` for weak passwords, Success green `#22C55E` for strong
+- Body background: deep dark with subtle teal and blue radial glows (animated drift)
+- Light theme receives matching secondary/green/red variables
+
+**Shield Visualization Upgrade**
+- 5 distinct strength levels with unique colors AND glow intensity
+- Level 1 (weak): red glow; Level 2: amber; Level 3: yellow; Level 4: green with breathing animation; Level 5: purple legendary glow
+- Pulsing SVG scale animation on strong passwords (levels 4-5)
+- Enhanced pulse animation on level change (0.5s spring)
+- Shield label gains text-shadow glow matching strength color
+
+**Generate Button Animation**
+- On click: button scales down to 0.93 (fast 80ms) then ripple outward via `generate-ripple` keyframe
+- Ripple: expanding box-shadow ring from accent color that fades to transparent
+- Spring easing for satisfying bounce-back
+
+**Password Reveal Enhancement**
+- Strength meter bar: smoother cubic-bezier fill transition (0.8s)
+- Strength bar gains glow pseudo-element matching current color
+- Score badge and strength label colors updated to v9 palette
+
+**Card & Section Styling**
+- Settings panels: enhanced glassmorphism with inset accent border, hover glow effect
+- Tab pills: gradient active state (teal -> blue), hover lift (`translateY(-1px)`)
+- Toggle switches: teal-to-blue gradient when active, enhanced glow shadow
+- Slider thumb: teal-to-blue gradient with ambient glow, 1.15x scale on hover
+- Setting chips: gradient active state matching tabs
+- Checker section: hover border highlight
+- Password display: hover border glow
+
+**Copy Feedback**
+- Green pulse border: double-pulse animation on password area (1.2s)
+- SVG checkmark draw animation via `stroke-dashoffset` (0.35s)
+- Toast countdown bar: animated gradient that shifts across teal/blue spectrum
+
+**Background Atmosphere**
+- Three overlapping radial gradients (teal + blue) with elliptical shapes
+- Subtle opacity drift animation (20s cycle) for living background feel
+- `prefers-reduced-motion` fully respected for all new animations
+
+### Technical
+- Service worker cache bumped to `passphrase-v9.0`
+- All existing functionality (generation, entropy, custom words, checker, compare, etc.) preserved
+- Zero breaking changes to DOM structure or JavaScript API
+
+---
+
 ## v8.0.0 (2026-03-29)
 
 ### New Features
