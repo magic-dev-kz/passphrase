@@ -1,5 +1,5 @@
 /**
- * PassPhrase v13 — Password Generator
+ * PassPhrase v14 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
@@ -1662,11 +1662,93 @@
     });
   }
 
+  // === v14: Password Expiry Reminder ===
+  var EXPIRY_KEY = 'pp-expiry-ts';
+  var EXPIRY_ENABLED_KEY = 'pp-expiry-enabled';
+  var EXPIRY_DAYS = 90;
+
+  function checkExpiryReminder() {
+    try {
+      if (localStorage.getItem(EXPIRY_ENABLED_KEY) !== '1') return;
+      var ts = parseInt(localStorage.getItem(EXPIRY_KEY) || '0', 10);
+      if (!ts) return;
+      var elapsed = Date.now() - ts;
+      var daysPassed = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+      if (daysPassed >= EXPIRY_DAYS) {
+        showExpiryBanner(daysPassed);
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function showExpiryBanner(days) {
+    if (document.getElementById('pp-expiry-banner')) return;
+    var banner = document.createElement('div');
+    banner.id = 'pp-expiry-banner';
+    banner.setAttribute('role', 'alert');
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#EF4444,#F97316);color:#fff;padding:12px 16px;text-align:center;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;';
+    banner.innerHTML = '<span>\u26a0\ufe0f Your password is ' + days + ' days old. Time to generate a new one!</span>' +
+      '<button id="pp-expiry-dismiss" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Dismiss</button>';
+    document.body.appendChild(banner);
+    document.getElementById('pp-expiry-dismiss').addEventListener('click', function() {
+      banner.remove();
+    });
+  }
+
+  function setExpiryTimestamp() {
+    try {
+      if (localStorage.getItem(EXPIRY_ENABLED_KEY) === '1') {
+        localStorage.setItem(EXPIRY_KEY, String(Date.now()));
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function initExpiryToggle() {
+    // Inject toggle into the settings area if there's a generate button
+    var genBtn = document.getElementById('btn-generate');
+    if (!genBtn) return;
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px;color:var(--text-secondary,#888);';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.id = 'pp-expiry-toggle';
+    var lbl = document.createElement('label');
+    lbl.htmlFor = 'pp-expiry-toggle';
+    lbl.textContent = 'Remind me to change in 90 days';
+    lbl.style.cursor = 'pointer';
+    wrapper.appendChild(cb);
+    wrapper.appendChild(lbl);
+    // Insert after generate button's parent
+    var parent = genBtn.parentNode;
+    if (parent && parent.nextSibling) {
+      parent.parentNode.insertBefore(wrapper, parent.nextSibling);
+    } else if (parent && parent.parentNode) {
+      parent.parentNode.appendChild(wrapper);
+    }
+    try { cb.checked = localStorage.getItem(EXPIRY_ENABLED_KEY) === '1'; } catch (e) {}
+    cb.addEventListener('change', function() {
+      try {
+        if (cb.checked) {
+          localStorage.setItem(EXPIRY_ENABLED_KEY, '1');
+          localStorage.setItem(EXPIRY_KEY, String(Date.now()));
+        } else {
+          localStorage.removeItem(EXPIRY_ENABLED_KEY);
+          localStorage.removeItem(EXPIRY_KEY);
+        }
+      } catch (e) { /* ignore */ }
+    });
+    // Set timestamp on every generation
+    genBtn.addEventListener('click', function() {
+      setExpiryTimestamp();
+    });
+  }
+
   // Wait for DOM + word lists
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { init(); initOnboarding(); });
+    document.addEventListener('DOMContentLoaded', function() { init(); initOnboarding(); initExpiryToggle(); checkExpiryReminder(); });
   } else {
     init();
     initOnboarding();
+    initExpiryToggle();
+    checkExpiryReminder();
   }
 })();

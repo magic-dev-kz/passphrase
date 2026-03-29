@@ -1,5 +1,11 @@
 # Changelog
 
+## v14.0.0 (2026-03-29)
+- **Password expiry reminder**: Optional toggle "Remind me to change in 90 days" below the generate button. Stores generation timestamp in localStorage. On next visit after 90+ days, a fixed red/orange banner warns the password is stale with dismiss option. Timestamp resets on each generation when enabled
+- Service worker cache bumped to `passphrase-v14.0`
+
+---
+
 ## v13.0.0 (2026-03-29)
 - **Password aging warning**: Timer shows "Generated X minutes ago" next to the password. Turns yellow after 5 minutes, red after 30 minutes with "Consider generating a new one" message. Resets on new generation, clears on auto-clear
 - Service worker cache bumped to `passphrase-v13.0`
