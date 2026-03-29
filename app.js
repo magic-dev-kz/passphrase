@@ -1,11 +1,12 @@
 /**
- * PassPhrase v9 — Password Generator
+ * PassPhrase v12 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
  * v7: PWA install banner, Space shortcut, remember settings
  * v8: phonetic hint, crack estimate, compare mode
  * v9: VISUAL IDENTITY — generate animation, copy pulse, shield glow
+ * v12: generate click sound, password length recommendation, entropy visualization
  */
 (function () {
   'use strict';
@@ -190,6 +191,28 @@
     return result;
   }
 
+  // === v12: Generate click sound via Web Audio ===
+  var _audioCtx = null;
+  function playGenerateClick() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try {
+      if (!_audioCtx) {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (_audioCtx.state === 'suspended') _audioCtx.resume();
+      var osc = _audioCtx.createOscillator();
+      var gain = _audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1800, _audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.08, _audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, _audioCtx.currentTime + 0.001);
+      osc.connect(gain);
+      gain.connect(_audioCtx.destination);
+      osc.start(_audioCtx.currentTime);
+      osc.stop(_audioCtx.currentTime + 0.001);
+    } catch (e) { /* Web Audio not available */ }
+  }
+
   // v6: Display flash on generate
   var $passwordDisplay = document.querySelector('.password-display');
 
@@ -223,6 +246,7 @@
       case 'classic': currentPassword = generateClassic(); break;
       case 'pin': currentPassword = generatePin(); break;
     }
+    playGenerateClick(); // v12: soft click sound
     typePassword(currentPassword);
     triggerDisplayFlash();
     updateShield(currentPassword);
@@ -231,6 +255,7 @@
     updateScoreBadge(currentPassword);
     updatePhoneticHint(currentPassword); // v8
     updateCrackEstimate(currentPassword); // v8
+    updateEntropyChart(currentPassword); // v12: entropy visualization
     addToHistory(currentPassword);
     if (typeof saveSettings === 'function') saveSettings(); // v7: persist settings
   }
@@ -1084,6 +1109,81 @@
     }
 
     $el.textContent = 'Would take ~' + timeStr + ' to crack (at 1 trillion guesses/sec)';
+  }
+
+  // === v12: Entropy Visualization (bar chart) ===
+  function updateEntropyChart(password) {
+    var $chart = document.getElementById('entropy-chart');
+    if (!$chart) return;
+
+    if (!password) {
+      $chart.classList.add('hidden');
+      return;
+    }
+
+    var components = [];
+    if (currentMode === 'phrase') {
+      var words;
+      if (useCustomWords && customWords.length >= 2) {
+        words = customWords;
+      } else {
+        words = phraseSettings.language === 'en' ? WORDS_EN : WORDS_RU;
+      }
+      var dictBits = Math.log2(words.length);
+      for (var i = 0; i < phraseSettings.wordCount; i++) {
+        components.push({ label: 'Word ' + (i + 1), bits: Math.floor(dictBits) });
+      }
+      if (phraseSettings.addNumber) {
+        components.push({ label: 'Number', bits: Math.floor(Math.log2(90)) });
+      }
+      if (phraseSettings.addSpecial) {
+        components.push({ label: 'Symbol', bits: Math.floor(Math.log2(SPECIAL_CHARS.length)) });
+      }
+    } else if (currentMode === 'classic') {
+      var cs = 0;
+      if (classicSettings.lower) cs += 26;
+      if (classicSettings.upper) cs += 26;
+      if (classicSettings.digits) cs += 10;
+      if (classicSettings.symbols) cs += 32;
+      if (cs === 0) cs = 36;
+      var perChar = Math.log2(cs);
+      // Group chars into chunks for display
+      var chunkSize = Math.max(1, Math.ceil(classicSettings.length / 6));
+      for (var j = 0; j < classicSettings.length; j += chunkSize) {
+        var count = Math.min(chunkSize, classicSettings.length - j);
+        components.push({ label: 'Chars ' + (j + 1) + '-' + (j + count), bits: Math.floor(perChar * count) });
+      }
+    } else if (currentMode === 'pin') {
+      var pinBitsPerDigit = Math.log2(10);
+      for (var k = 0; k < pinSettings.length; k++) {
+        components.push({ label: 'Digit ' + (k + 1), bits: Math.floor(pinBitsPerDigit) });
+      }
+    }
+
+    if (components.length === 0) {
+      $chart.classList.add('hidden');
+      return;
+    }
+
+    var maxBits = 0;
+    for (var m = 0; m < components.length; m++) {
+      if (components[m].bits > maxBits) maxBits = components[m].bits;
+    }
+    if (maxBits === 0) maxBits = 1;
+
+    var html = '<div class="entropy-chart__title">Entropy Contribution</div><div class="entropy-chart__bars">';
+    for (var n = 0; n < components.length; n++) {
+      var c = components[n];
+      var pct = Math.max(3, (c.bits / maxBits) * 100);
+      var color = c.bits >= 10 ? 'var(--green, #22C55E)' : c.bits >= 6 ? 'var(--yellow, #EAB308)' : 'var(--red, #EF4444)';
+      html += '<div class="entropy-bar-row">' +
+        '<span class="entropy-bar-label">' + c.label + '</span>' +
+        '<div class="entropy-bar-track"><div class="entropy-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+        '<span class="entropy-bar-value">' + c.bits + 'b</span></div>';
+    }
+    html += '</div>';
+    $chart.innerHTML = html;
+    $chart.classList.remove('hidden');
   }
 
   // === v8: Compare Mode ===

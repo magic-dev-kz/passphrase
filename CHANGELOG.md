@@ -1,5 +1,13 @@
 # Changelog
 
+## v12.0.0 (2026-03-29)
+- **Generate sound**: Soft click/tick sound via Web Audio API (1ms square wave burst at 1800Hz) plays on each password generation. Respects `prefers-reduced-motion`
+- **Password length recommendation**: "Recommended: 4+ words for most uses" hint text shown below the word count selector in Phrase mode
+- **Entropy visualization**: Small bar chart showing entropy contribution of each password component (words, numbers, symbols for Phrase; character groups for Classic; individual digits for PIN). Color-coded bars: green (10+ bits), yellow (6-9 bits), red (<6 bits)
+- Service worker cache bumped to `passphrase-v12.0`
+
+---
+
 ## v11.0.0 (2026-03-29)
 - **Onboarding overlay**: First-visit glassmorphism overlay with app title, tagline, 3 feature highlights (staggered fade-in), and "Generate My First Password" CTA
 - CTA dismisses overlay, sets localStorage flag (`passphrase_onboarded`), and auto-generates first password

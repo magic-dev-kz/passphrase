@@ -1,9 +1,10 @@
-/* === PassPhrase v9 — Designed by Sky === */
+/* === PassPhrase v12 — Designed by Sky === */
 /* Deep security aesthetic with glassmorphism & cyber glow */
 /* v6: generate blur→reveal, copy glow, crossfade tabs */
 /* v7: PWA install banner, Space shortcut, remember settings */
 /* v8: phonetic hint, crack estimate, compare mode */
 /* v9: VISUAL IDENTITY — security color system, shield glow, generate animation, glassmorphism cards */
+/* v12: generate click sound, password length recommendation, entropy visualization */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
@@ -2252,6 +2253,72 @@ button:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .onboarding-card, .onboarding-feature { animation: none; }
   .onboarding-overlay { transition: none; }
+}
+
+/* === v12: Password length recommendation hint === */
+.setting-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  opacity: 0.85;
+}
+
+/* === v12: Entropy visualization chart === */
+.entropy-chart {
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding: 12px 14px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-c);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+.entropy-chart.hidden { display: none; }
+.entropy-chart__title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.entropy-chart__bars { display: flex; flex-direction: column; gap: 5px; }
+.entropy-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.entropy-bar-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 52px;
+  text-align: right;
+  white-space: nowrap;
+}
+.entropy-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.entropy-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 2px;
+}
+.entropy-bar-value {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 24px;
+  font-family: var(--font-mono);
 }
 
 .oc-footer{text-align:center;padding:20px 16px 24px;margin-top:24px}
