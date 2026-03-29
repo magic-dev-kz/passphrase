@@ -275,14 +275,12 @@
   }
 
   function getShieldColor(level) {
-    const colors = {
-      1: '#FF453A',
-      2: '#FF9F0A',
-      3: '#FFD60A',
-      4: '#30D158',
-      5: '#BF5AF2'
-    };
-    return colors[level];
+    // Read from CSS vars so light/dark theme overrides apply
+    var style = getComputedStyle(document.documentElement);
+    var fromVar = style.getPropertyValue('--shield-' + level).trim();
+    if (fromVar) return fromVar;
+    var fallback = { 1: '#FF453A', 2: '#FF9F0A', 3: '#FFD60A', 4: '#30D158', 5: '#BF5AF2' };
+    return fallback[level];
   }
 
   function updateShield(password) {
@@ -679,11 +677,12 @@
     if (isSequential) penalizedEntropy = Math.floor(entropy * 0.4);
 
     let level, label, color;
-    if (penalizedEntropy < 30) { level = 1; label = 'Weak'; color = '#FF453A'; }
-    else if (penalizedEntropy < 50) { level = 2; label = 'Fair'; color = '#FF9F0A'; }
-    else if (penalizedEntropy < 70) { level = 3; label = 'Strong'; color = '#FFD60A'; }
-    else if (penalizedEntropy < 90) { level = 4; label = 'Very Strong'; color = '#30D158'; }
-    else { level = 5; label = 'Excellent'; color = '#BF5AF2'; }
+    if (penalizedEntropy < 30) { level = 1; label = 'Weak'; }
+    else if (penalizedEntropy < 50) { level = 2; label = 'Fair'; }
+    else if (penalizedEntropy < 70) { level = 3; label = 'Strong'; }
+    else if (penalizedEntropy < 90) { level = 4; label = 'Very Strong'; }
+    else { level = 5; label = 'Excellent'; }
+    color = getShieldColor(level);
 
     const crackTime = getCrackTime(penalizedEntropy);
 
@@ -775,6 +774,21 @@
     bindEvents();
     generate(); // AC-1: auto-generate on open
   }
+
+  // === Clipboard security: clear on tab close / hide ===
+  window.addEventListener('beforeunload', function() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try { navigator.clipboard.writeText(''); } catch(e) {}
+    }
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden && clipboardClearTimer) {
+      try { navigator.clipboard.writeText(''); } catch(e) {}
+      clearTimeout(clipboardClearTimer);
+      clipboardClearTimer = null;
+    }
+  });
 
   // Wait for DOM + word lists
   if (document.readyState === 'loading') {

@@ -60,6 +60,8 @@
   --text-muted:      #6C6C70;
   --gray:            #C7C7CC;
   --accent-bg:       rgba(10, 132, 255, 0.08);
+  --yellow:          #B8860B;
+  --shield-3:        #B8860B;
 }
 
 @media (prefers-color-scheme: light) {
@@ -72,6 +74,8 @@
     --text-muted:      #6C6C70;
     --gray:            #C7C7CC;
     --accent-bg:       rgba(10, 132, 255, 0.08);
+    --yellow:          #B8860B;
+    --shield-3:        #B8860B;
   }
 }
 
