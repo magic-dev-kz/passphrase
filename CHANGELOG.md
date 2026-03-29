@@ -1,5 +1,9 @@
 # Changelog
 
+## v16.0 (2026-03-29) — Select All on Double-Click
+
+- **Double-click to select all**: Double-clicking the password output selects the entire password (prevents partial selection)
+- SW cache bumped to `passphrase-v16.0`
 ## v15.0.0 (2026-03-29)
 - **Password pronunciation**: In Classic mode, shows phonetic pronunciation below the password (e.g., "xK9m" becomes "Ex-Kay-nine-em"). Maps each character to its NATO/phonetic name. Uppercase letters get capitalized pronunciation. Truncated at 30 chars with ellipsis
 - Service worker cache bumped to `passphrase-v15.0`

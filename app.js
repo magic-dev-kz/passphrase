@@ -1786,13 +1786,31 @@
     });
   }
 
+  // v16: Double-click password to select all (prevent partial selection)
+  function initPasswordSelectAll() {
+    if (!$passwordText) return;
+    $passwordText.addEventListener('dblclick', function(e) {
+      e.preventDefault();
+      var text = $passwordText.textContent;
+      if (!text) return;
+      var range = document.createRange();
+      range.selectNodeContents($passwordText);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+    $passwordText.style.userSelect = 'all';
+    $passwordText.style.webkitUserSelect = 'all';
+  }
+
   // Wait for DOM + word lists
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { init(); initOnboarding(); initExpiryToggle(); checkExpiryReminder(); });
+    document.addEventListener('DOMContentLoaded', function() { init(); initOnboarding(); initExpiryToggle(); checkExpiryReminder(); initPasswordSelectAll(); });
   } else {
     init();
     initOnboarding();
     initExpiryToggle();
     checkExpiryReminder();
+    initPasswordSelectAll();
   }
 })();
