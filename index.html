@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PassPhrase — Password Generator</title>
+<link rel="manifest" href="manifest.json">
+<meta name="description" content="Generate memorable, secure passwords in 3 seconds. No accounts, no tracking, works offline.">
+<meta property="og:title" content="PassPhrase — Password Generator">
+<meta property="og:description" content="Generate memorable, secure passwords in 3 seconds. Passphrases, classic, PIN. No tracking, offline.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PassPhrase — Password Generator">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <h1 class="header__title">PassPhrase</h1>
+    <div class="header__actions">
+      <button class="icon-btn" id="btn-history" aria-label="Password history">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-theme" aria-label="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mode tabs -->
+  <div class="tabs" id="tabs" role="tablist" aria-label="Generation mode">
+    <button class="tab active" role="tab" data-mode="phrase" aria-selected="true" tabindex="0" id="tab-phrase" aria-controls="settings-phrase">Phrase</button>
+    <button class="tab" role="tab" data-mode="classic" aria-selected="false" tabindex="-1" id="tab-classic" aria-controls="settings-classic">Classic</button>
+    <button class="tab" role="tab" data-mode="pin" aria-selected="false" tabindex="-1" id="tab-pin" aria-controls="settings-pin">PIN</button>
+  </div>
+
+  <!-- Password display -->
+  <div class="password-display" role="region" aria-label="Generated password">
+    <div class="password-text" id="password-text" aria-live="polite"></div>
+  </div>
+
+  <!-- Shield -->
+  <div class="shield-container">
+    <div class="shield" id="shield" data-level="1" aria-hidden="true">
+      <svg viewBox="0 0 64 72" xmlns="http://www.w3.org/2000/svg">
+        <!-- Shield base -->
+        <path class="shield__base" d="M32 4 L4 16 L4 36 C4 52 18 66 32 70 C46 66 60 52 60 36 L60 16 Z"/>
+        <path class="shield__outline" d="M32 4 L4 16 L4 36 C4 52 18 66 32 70 C46 66 60 52 60 36 L60 16 Z"/>
+        <!-- Cracks (level 1) -->
+        <path class="shield__crack" d="M28 20 L32 32 L26 44"/>
+        <path class="shield__crack" d="M38 18 L34 28 L40 38"/>
+        <!-- Checkmark (level 2-3) -->
+        <g class="shield__icon" style="opacity:0; transition: opacity 0.3s" id="shield-check">
+          <path d="M22 36 L29 43 L42 28" fill="none" stroke="var(--shield-color)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <!-- Sword (level 4-5) -->
+        <g class="shield__sword">
+          <line x1="32" y1="22" x2="32" y2="50" stroke="var(--shield-color)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="25" y1="30" x2="39" y2="30" stroke="var(--shield-color)" stroke-width="2.5" stroke-linecap="round"/>
+        </g>
+        <!-- Crown (level 5) -->
+        <g class="shield__crown">
+          <path d="M22 18 L27 12 L32 16 L37 12 L42 18" fill="none" stroke="var(--shield-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </div>
+    <div class="shield-label" id="shield-label">Cracked in a minute</div>
+    <div class="shield-time" id="shield-time" aria-live="polite"></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="actions">
+    <button class="btn btn--primary" id="btn-generate" aria-label="Generate new password">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      Generate
+    </button>
+    <button class="btn btn--secondary" id="btn-copy" aria-label="Copy to clipboard">
+      <span class="btn__icon-copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
+      <span class="btn__icon-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+      Copy
+    </button>
+  </div>
+
+  <!-- Phrase settings -->
+  <div class="settings" id="settings-phrase" role="tabpanel" aria-labelledby="tab-phrase">
+    <div class="setting-row">
+      <span class="setting-label">Words</span>
+      <div class="setting-options">
+        <button class="setting-chip" data-word-count="3">3</button>
+        <button class="setting-chip active" data-word-count="4">4</button>
+        <button class="setting-chip" data-word-count="5">5</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Separator</span>
+      <div class="setting-options">
+        <button class="setting-chip active" data-separator="-">-</button>
+        <button class="setting-chip" data-separator=".">.</button>
+        <button class="setting-chip" data-separator="_">_</button>
+        <button class="setting-chip" data-separator="">none</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Add number</span>
+      <button class="toggle active" id="toggle-number" role="switch" aria-checked="true" aria-label="Add number to passphrase"></button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Add symbol</span>
+      <button class="toggle" id="toggle-special" role="switch" aria-checked="false" aria-label="Add special symbol to passphrase"></button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Language</span>
+      <div class="setting-options">
+        <button class="setting-chip active" data-lang="en">English</button>
+        <button class="setting-chip" data-lang="ru">Russian</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classic settings -->
+  <div class="settings hidden" id="settings-classic" role="tabpanel" aria-labelledby="tab-classic">
+    <div class="slider-row">
+      <div class="slider-header">
+        <span class="setting-label">Length</span>
+        <span class="slider-value" id="classic-length-value">20</span>
+      </div>
+      <input type="range" id="classic-length" min="12" max="64" value="20" aria-label="Password length">
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Uppercase (A-Z)</span>
+      <button class="toggle active" id="toggle-upper" role="switch" aria-checked="true" aria-label="Include uppercase letters"></button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Lowercase (a-z)</span>
+      <button class="toggle active" id="toggle-lower" role="switch" aria-checked="true" aria-label="Include lowercase letters"></button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Digits (0-9)</span>
+      <button class="toggle active" id="toggle-digits" role="switch" aria-checked="true" aria-label="Include digits"></button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Symbols (!@#)</span>
+      <button class="toggle active" id="toggle-symbols" role="switch" aria-checked="true" aria-label="Include symbols"></button>
+    </div>
+  </div>
+
+  <!-- PIN settings -->
+  <div class="settings hidden" id="settings-pin" role="tabpanel" aria-labelledby="tab-pin">
+    <div class="slider-row">
+      <div class="slider-header">
+        <span class="setting-label">Digits</span>
+        <span class="slider-value" id="pin-length-value">6</span>
+      </div>
+      <input type="range" id="pin-length" min="4" max="8" value="6" aria-label="PIN length">
+    </div>
+  </div>
+
+  <!-- Password Strength Checker -->
+  <div class="checker" id="checker-section">
+    <div class="checker__header">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span class="checker__title">Check your password</span>
+    </div>
+    <div class="checker__input-wrap">
+      <input type="password" class="checker__input" id="checker-input" placeholder="Paste or type a password..." autocomplete="off" spellcheck="false">
+      <button class="checker__eye" id="checker-eye" aria-label="Toggle password visibility">
+        <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </button>
+    </div>
+    <div class="checker__result hidden" id="checker-result">
+      <div class="checker__bar-track">
+        <div class="checker__bar-fill" id="checker-bar"></div>
+      </div>
+      <div class="checker__verdict" id="checker-verdict"></div>
+      <div class="checker__details" id="checker-details"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Passwords never leave your browser
+  </footer>
+
+</div><!-- .app -->
+
+<!-- Copy toast -->
+<div class="copy-toast" id="copy-toast" aria-live="polite">
+  <span class="copy-toast__text">Copied! Auto-clears in <span id="toast-countdown">30</span>s</span>
+  <div class="copy-toast__bar" id="toast-bar"></div>
+</div>
+
+<!-- History panel -->
+<div class="history-overlay" id="history-overlay" role="dialog" aria-modal="true" aria-label="Password history">
+  <div class="history-backdrop" id="history-backdrop"></div>
+  <div class="history-panel">
+    <div class="history-header">
+      <h2 class="history-header__title">History</h2>
+      <button class="history-close" id="history-close" aria-label="Close history">&times;</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+    <div class="history-footer">
+      <div class="history-warning">Session only — clears when you close the tab</div>
+      <button class="btn--danger" id="history-clear">Clear history</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm dialog -->
+<div class="confirm-overlay" id="confirm-overlay" role="alertdialog" aria-modal="true" aria-label="Confirm clear history">
+  <div class="confirm-backdrop" id="confirm-backdrop"></div>
+  <div class="confirm-dialog">
+    <div class="confirm-dialog__text">Clear all password history?</div>
+    <div class="confirm-dialog__actions">
+      <button class="btn btn--secondary" id="confirm-no">Cancel</button>
+      <button class="btn btn--primary" id="confirm-yes" style="background:var(--red)">Clear</button>
+    </div>
+  </div>
+</div>
+
+<script src="words-en.js"></script>
+<script src="words-ru.js"></script>
+<script src="app.js"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}</script>
+</body>
+</html>

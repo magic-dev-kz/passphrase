@@ -1,0 +1,14 @@
+{
+  "name": "PassPhrase",
+  "short_name": "PassPhrase",
+  "description": "Secure password generator",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1C1C1E",
+  "theme_color": "#0A84FF",
+  "scope": ".",
+  "icons": [
+    {"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛡️</text></svg>", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛡️</text></svg>", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}
+  ]
+}
