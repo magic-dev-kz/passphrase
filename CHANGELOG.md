@@ -1,0 +1,137 @@
+# Changelog
+
+## v5.0.0 (2026-03-29)
+
+### New Features
+
+**Breach Pattern Check**
+- Local pattern-based breach detection (no API calls — full privacy)
+- Checks for common breach passwords (password, 123456, qwerty, admin, etc.)
+- Detects too-short passwords (< 8 chars), digit-only, repeating characters (aaa, 111)
+- Warning banner with caution icon appears below strength meter when patterns detected
+- Also integrated into the Password Strength Checker section
+
+**Password Score Badge**
+- Numerical score (0–100) displayed next to the generated password
+- Based on entropy bits: <30 bits = 0–20, 30–50 = 20–50, 50–70 = 50–75, 70–100 = 75–90, 100+ = 90–100
+- Color-coded to match strength meter (red/orange/yellow/green/emerald)
+- Glowing border effect matching the score color
+
+**Transfer Password Modal**
+- "Show" button (grid icon) next to Copy for easy password transfer
+- Opens a large-font modal displaying the password for cross-device transfer
+- Glassmorphism dialog with accent-colored, high-contrast password text
+- Closable via button, backdrop click, or Escape key
+
+**Sticky Header**
+- Header now sticks to top on scroll with glassmorphism background
+- Glass blur + border bottom for visual separation from content
+
+### Technical
+- Service worker cache bumped to `passphrase-v5.0`
+- Breach check integrated into both generator and checker sections
+- Score calculation added to checker details output
+
+---
+
+## v4.0.0 (2026-03-29)
+
+### New Features
+
+**Password Strength Meter**
+- Animated horizontal bar below password display
+- Gradient colors: red (Weak) -> orange (Fair) -> yellow (Good) -> green (Strong) -> emerald (Very Strong)
+- Based on entropy bits calculation
+- Animated shine sweep effect on the bar
+- Updates in real-time with each generated password
+
+**Custom Word Lists**
+- Textarea in Phrase settings for user-defined words (comma-separated, max 20)
+- "Use" toggle to enable/disable custom words in phrase generation
+- "Save" button persists to localStorage, "Clear" button removes
+- Falls back to standard dictionary if fewer than 2 custom words
+- Entropy calculation adjusts for custom dictionary size
+
+**Auto-clear after Copy**
+- After copying, password result auto-clears in 30 seconds
+- Visual countdown (30...29...28...) in the toast notification
+- Animated progress bar shrinks over 30 seconds
+- "Keep" button to cancel auto-clear and retain the password
+- Auto-clear cancelled when generating a new password
+
+**Password History (enhanced)**
+- Session-only history already existed (v1); no changes to storage model
+- History panel accessible via clock icon in header
+
+### Technical
+- Service worker cache bumped to `passphrase-v4.0`
+
+---
+
+## v3.0.0 (2026-03-29)
+
+### Visual Redesign by Sky
+
+**Gradient Backgrounds**
+- Deep dark gradient background (`#0a0e17` to `#0a1628`) for a security-focused aesthetic
+- Subtle radial accent glows (cyan/green) in the background layer
+- Fixed background attachment for immersive scrolling
+
+**Typography**
+- Google Fonts: Inter (UI) and JetBrains Mono (passwords/code)
+- Gradient title text (cyan-to-green) for the PassPhrase header
+- Password text glow effect with `text-shadow` using accent color
+
+**Glassmorphism**
+- All cards (password display, settings, checker, tabs, toast, dialogs) use translucent glass effect
+- `backdrop-filter: blur(16px)` with semi-transparent backgrounds
+- Subtle glass border (cyan-tinted `rgba`) and inset shine highlight
+- Works in both dark and light themes
+
+**Micro-animations**
+- Button hover: lift (`translateY(-1px)`) + glow shadow intensification
+- Copy feedback: `copy-flash` scale animation on success
+- Password reveal: blur-to-clear + scale-up animation (`password-reveal` keyframe)
+- Slider thumb: scale-up on hover with glow shadow
+- Setting chips: lift on hover
+- Icon buttons: color transition to accent + subtle glow on hover
+
+**Strength Indicator**
+- Animated shine sweep on the checker bar (`bar-shine` keyframe)
+- Dark inset track for better contrast
+- Smooth gradient transitions as strength changes
+
+**Security Glow Theme**
+- Cyan/green accent palette (`#00d4aa`, `#00e68a`) throughout
+- Soft colored shadows on primary buttons and active toggles
+- Shield level 5 glow updated to match new palette
+- Active tabs and toggles use gradient fills with glow shadows
+
+**Slider & Toggles**
+- Toggle switch: gradient background when active, spring-animated knob, glow shadow
+- Range slider thumb: gradient fill (cyan-to-green), hover scale + glow
+
+**Mobile Polish**
+- Preserved all responsive breakpoints (360px, 600px)
+- Touch-friendly tap targets maintained at 44px
+- Safe area inset support retained
+- `prefers-reduced-motion` fully respected (disables all new animations)
+
+**Dark/Light Mode**
+- Both themes fully supported with adapted glass, border, and glow values
+- `prefers-color-scheme` media query preserved for auto-detection
+- Manual `data-theme` toggle preserved
+
+### No Breaking Changes
+- Zero JavaScript modifications
+- All `id`, `data-*`, and `aria-*` attributes unchanged
+- All class names and DOM structure preserved
+
+---
+
+## v1.0 (2026-03-29)
+- Initial release
+- Ship-ready (9.0/10)
+- PWA (service worker + manifest)
+- WCAG AA accessible
+- Works offline

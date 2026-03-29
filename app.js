@@ -1,5 +1,5 @@
 /**
- * PassPhrase — Password Generator
+ * PassPhrase v5 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  */
@@ -196,6 +196,8 @@
     typePassword(currentPassword);
     updateShield(currentPassword);
     updateStrengthMeter(currentPassword);
+    updateBreachWarning(currentPassword);
+    updateScoreBadge(currentPassword);
     addToHistory(currentPassword);
   }
 
@@ -358,6 +360,111 @@
     $strengthLabel.textContent = label;
     $strengthLabel.style.color = color;
     $strengthBits.textContent = entropy + ' bits';
+  }
+
+  // === Breach Pattern Check ===
+  const BREACH_WORDS = [
+    'password', '123456', 'qwerty', 'admin', 'letmein', 'welcome',
+    'monkey', 'dragon', 'master', 'abc123', 'login', 'starwars',
+    'trustno1', 'iloveyou', 'sunshine', 'princess', 'football',
+    'shadow', 'superman', 'michael', 'ashley', 'bailey',
+    '111111', '000000', '654321', 'passw0rd', 'p@ssword'
+  ];
+
+  function checkBreachPatterns(password) {
+    const warnings = [];
+    const lower = password.toLowerCase();
+
+    // Check common breach words
+    for (var i = 0; i < BREACH_WORDS.length; i++) {
+      if (lower.includes(BREACH_WORDS[i])) {
+        warnings.push('Contains common password: "' + BREACH_WORDS[i] + '"');
+        break;
+      }
+    }
+
+    // Too short
+    if (password.length < 8) {
+      warnings.push('Too short (less than 8 characters)');
+    }
+
+    // Only digits
+    if (/^\d+$/.test(password) && password.length < 10) {
+      warnings.push('Only digits — easy to brute-force');
+    }
+
+    // Repeating characters (3+ same char in a row)
+    if (/(.)\1{2,}/.test(password)) {
+      warnings.push('Contains repeating characters');
+    }
+
+    // Sequential patterns
+    if (/^(012|123|234|345|456|567|678|789|abc|bcd|cde|def)/i.test(password)) {
+      warnings.push('Starts with sequential pattern');
+    }
+
+    return warnings;
+  }
+
+  function updateBreachWarning(password) {
+    var $warning = document.getElementById('breach-warning');
+    var $text = document.getElementById('breach-warning-text');
+    if (!$warning) return;
+
+    var warnings = checkBreachPatterns(password);
+    if (warnings.length > 0) {
+      $text.textContent = warnings[0];
+      $warning.classList.remove('hidden');
+    } else {
+      $warning.classList.add('hidden');
+    }
+  }
+
+  // === Password Score Badge ===
+  function calculateScore(entropy) {
+    if (entropy < 30) return Math.round((entropy / 30) * 20);
+    if (entropy < 50) return 20 + Math.round(((entropy - 30) / 20) * 30);
+    if (entropy < 70) return 50 + Math.round(((entropy - 50) / 20) * 25);
+    if (entropy < 100) return 75 + Math.round(((entropy - 70) / 30) * 15);
+    return Math.min(100, 90 + Math.round(((entropy - 100) / 50) * 10));
+  }
+
+  function getScoreColor(score) {
+    if (score < 20) return '#ff4757';
+    if (score < 50) return '#ffa502';
+    if (score < 75) return '#ffd32a';
+    if (score < 90) return '#00e68a';
+    return '#00d4aa';
+  }
+
+  function updateScoreBadge(password) {
+    var $scoreValue = document.getElementById('score-value');
+    var $scoreBadge = document.getElementById('password-score');
+    if (!$scoreValue || !$scoreBadge) return;
+
+    var entropy = calculateEntropy(password);
+    var score = calculateScore(entropy);
+    var color = getScoreColor(score);
+
+    $scoreValue.textContent = score;
+    $scoreValue.style.color = color;
+    $scoreBadge.style.borderColor = color;
+    $scoreBadge.style.boxShadow = '0 0 12px ' + color + '33';
+  }
+
+  // === Transfer Modal ===
+  function openTransfer() {
+    if (!currentPassword) return;
+    var $overlay = document.getElementById('transfer-overlay');
+    var $pw = document.getElementById('transfer-password');
+    if (!$overlay || !$pw) return;
+    $pw.textContent = currentPassword;
+    $overlay.classList.add('open');
+  }
+
+  function closeTransfer() {
+    var $overlay = document.getElementById('transfer-overlay');
+    if ($overlay) $overlay.classList.remove('open');
   }
 
   // === Copy with auto-clear ===
@@ -770,7 +877,7 @@
 
     const crackTime = getCrackTime(penalizedEntropy);
 
-    return { entropy: penalizedEntropy, level, label, color, types, len, crackTime, isDictionary, isSequential };
+    return { entropy: penalizedEntropy, level, label, color, types, len, crackTime, isDictionary, isSequential, _raw: pw };
   }
 
   function renderCheckerResult(a, $bar, $verdict, $details) {
@@ -781,9 +888,14 @@
     $verdict.style.color = a.color;
 
     let info = a.len + ' chars \u00B7 ' + a.types.join(', ') + ' \u00B7 ' + a.entropy + ' bits';
-    if (a.isDictionary) info += ' \u00B7 Contains common word!';
-    if (a.isSequential) info += ' \u00B7 Sequential pattern!';
+    if (a.isDictionary) info += ' \u00B7 \u26A0\uFE0F Contains common word!';
+    if (a.isSequential) info += ' \u00B7 \u26A0\uFE0F Sequential pattern!';
+    var breachWarnings = checkBreachPatterns(a._raw || '');
+    if (breachWarnings.length > 0 && !a.isDictionary && !a.isSequential) {
+      info += ' \u00B7 \u26A0\uFE0F ' + breachWarnings[0];
+    }
     info += '\nTime to crack: ~' + a.crackTime;
+    info += '\nScore: ' + calculateScore(a.entropy) + '/100';
     $details.textContent = info;
   }
 
@@ -887,6 +999,20 @@
       $toastKeep.addEventListener('click', cancelAutoClear);
     }
 
+    // Transfer / Show password
+    var $btnShowPw = document.getElementById('btn-show-password');
+    if ($btnShowPw) {
+      $btnShowPw.addEventListener('click', openTransfer);
+    }
+    var $transferClose = document.getElementById('transfer-close');
+    if ($transferClose) {
+      $transferClose.addEventListener('click', closeTransfer);
+    }
+    var $transferBackdrop = document.getElementById('transfer-backdrop');
+    if ($transferBackdrop) {
+      $transferBackdrop.addEventListener('click', closeTransfer);
+    }
+
     // History
     $historyToggle.addEventListener('click', openHistory);
     $historyClose.addEventListener('click', closeHistory);
@@ -899,7 +1025,10 @@
     // Keyboard
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if ($confirmOverlay.classList.contains('open')) {
+        var $transferOverlay = document.getElementById('transfer-overlay');
+        if ($transferOverlay && $transferOverlay.classList.contains('open')) {
+          closeTransfer();
+        } else if ($confirmOverlay.classList.contains('open')) {
           cancelClearHistory();
         } else if ($historyOverlay.classList.contains('open')) {
           closeHistory();

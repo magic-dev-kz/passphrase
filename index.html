@@ -45,7 +45,13 @@
 
   <!-- Password display -->
   <div class="password-display" role="region" aria-label="Generated password">
-    <div class="password-text" id="password-text" aria-live="polite"></div>
+    <div class="password-display__top">
+      <div class="password-text" id="password-text" aria-live="polite"></div>
+      <div class="password-score" id="password-score" aria-label="Password score">
+        <span class="password-score__value" id="score-value">0</span>
+        <span class="password-score__max">/100</span>
+      </div>
+    </div>
   </div>
 
   <!-- Strength Meter -->
@@ -88,6 +94,12 @@
     <div class="shield-time" id="shield-time" aria-live="polite"></div>
   </div>
 
+  <!-- Breach warning -->
+  <div class="breach-warning hidden" id="breach-warning" role="alert">
+    <span class="breach-warning__icon" aria-hidden="true">&#9888;&#65039;</span>
+    <span class="breach-warning__text" id="breach-warning-text">This password matches common breach patterns</span>
+  </div>
+
   <!-- Action buttons -->
   <div class="actions">
     <button class="btn btn--primary" id="btn-generate" aria-label="Generate new password">
@@ -98,6 +110,9 @@
       <span class="btn__icon-copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
       <span class="btn__icon-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
       Copy
+    </button>
+    <button class="btn btn--secondary btn--qr" id="btn-show-password" aria-label="Show password for transfer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg>
     </button>
   </div>
 
@@ -221,6 +236,19 @@
   </footer>
 
 </div><!-- .app -->
+
+<!-- Transfer modal -->
+<div class="transfer-overlay" id="transfer-overlay" role="dialog" aria-modal="true" aria-label="Password transfer">
+  <div class="transfer-backdrop" id="transfer-backdrop"></div>
+  <div class="transfer-dialog">
+    <div class="transfer-dialog__header">
+      <span class="transfer-dialog__title">Transfer Password</span>
+      <button class="history-close" id="transfer-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="transfer-dialog__password" id="transfer-password" aria-live="polite"></div>
+    <div class="transfer-dialog__hint">Show this to your other device, then close</div>
+  </div>
+</div>
 
 <!-- Copy toast -->
 <div class="copy-toast" id="copy-toast" aria-live="polite">
