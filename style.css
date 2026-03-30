@@ -2324,3 +2324,23 @@ button:focus-visible {
 .oc-footer{text-align:center;padding:20px 16px 24px;margin-top:24px}
 .oc-footer a{font-size:.78rem;color:var(--text-muted,var(--text-secondary,#888));text-decoration:none;opacity:.6;transition:opacity .2s}
 .oc-footer a:hover{opacity:1}
+
+/* === Print Styles === */
+/* Security note: only prints the currently visible password + strength info.
+   History panel and settings are hidden. */
+@media print{
+  .onboarding-overlay,.skip-link,.pwa-banner,.oc-footer,.toast,
+  .header,.tabs,.shield-container,.entropy-chart,
+  .settings-panel,.history-panel,.phonetic-hint,.crack-estimate,
+  .icon-btn,
+  button{display:none!important}
+  body{background:#fff!important;color:#000!important;font-size:14pt}
+  .app{max-width:100%;padding:0;margin:0;background:#fff!important}
+  .password-display{border:2px solid #000;background:#fff!important;padding:16px;break-inside:avoid}
+  .password-text{color:#000!important;font-size:16pt;word-break:break-all}
+  .password-score{color:#000!important}
+  .strength-meter{break-inside:avoid;margin-top:8px}
+  .strength-meter__bar-fill{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .strength-meter__label,.strength-meter__bits{color:#000!important}
+  @page{margin:2cm;size:auto}
+}

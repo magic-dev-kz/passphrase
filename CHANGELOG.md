@@ -1,5 +1,10 @@
 # Changelog
 
+## v20.0 (2026-03-29) — Print Styles
+
+- **Print stylesheet**: `@media print` rules — hides header, tabs, shield, history panel, settings (security-conscious); shows only current password + strength meter; white bg, black text
+- SW cache bumped to `passphrase-v20.0`
+
 ## v19.0 (2026-03-29) — Error Handling Hardening
 
 - **Empty wordlist guard**: If word list file fails to load, show clear error instead of generating broken password
