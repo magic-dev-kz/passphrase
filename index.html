@@ -360,7 +360,11 @@
 <script src="words-en.js"></script>
 <script src="words-ru.js"></script>
 <script src="app.js"></script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}</script>
+<script>
+// v26: Defer SW registration to not block first paint
+if('requestIdleCallback' in window){requestIdleCallback(function(){if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}});}
+else{setTimeout(function(){if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}},100);}
+</script>
 <div class="oc-footer"><a href="https://magic-dev-kz.github.io/openclaw/" target="_blank" rel="noopener">More free tools → OpenClaw</a></div>
 </body>
 </html>

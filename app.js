@@ -1939,14 +1939,26 @@
     $passwordText.style.webkitUserSelect = 'all';
   }
 
+  // v26: Helper to defer non-critical features to not block first paint
+  var _deferInit = function(fn) {
+    if ('requestIdleCallback' in window) { requestIdleCallback(fn); }
+    else { setTimeout(fn, 100); }
+  };
+
   // Wait for DOM + word lists
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { init(); initOnboarding(); initExpiryToggle(); checkExpiryReminder(); initPasswordSelectAll(); });
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
+      initOnboarding();
+      initPasswordSelectAll();
+      _deferInit(function() { initExpiryToggle(); });
+      _deferInit(function() { checkExpiryReminder(); });
+    });
   } else {
     init();
     initOnboarding();
-    initExpiryToggle();
-    checkExpiryReminder();
     initPasswordSelectAll();
+    _deferInit(function() { initExpiryToggle(); });
+    _deferInit(function() { checkExpiryReminder(); });
   }
 })();

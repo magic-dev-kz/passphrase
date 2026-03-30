@@ -2,6 +2,12 @@
 
 
 
+## v26.0 (2026-03-29) — Deferred Init for Faster First Paint
+
+- **Performance: deferred non-critical init**: Expiry toggle, expiry reminder check, and SW registration wrapped in `requestIdleCallback` (with `setTimeout` fallback) so main UI renders before secondary features load
+- SW cache bumped to `passphrase-v26.0`
+
+---
 ## v25.0 (2026-03-29) — Security Meta Tags
 
 - **Security hardening**: Added `X-Content-Type-Options: nosniff`, `referrer: no-referrer`, and `format-detection: telephone=no` meta tags to `<head>`
