@@ -1,6 +1,13 @@
 # Changelog
 
 
+
+## v24.0 (2026-03-29) — JSON-LD Structured Data
+
+- **JSON-LD structured data**: Added WebApplication schema markup in `<head>` for improved SEO and rich search results
+- SW cache bumped to `passphrase-v24.0`
+
+---
 ## v23.0 (2026-03-29) — Deferred Font Loading
 
 - **Non-blocking Google Fonts**: Font CSS in both `index.html` and `style.css` changed from render-blocking `<link>` / `@import` to `<link rel="preload" ... onload>` with `<noscript>` fallback — improves First Contentful Paint
