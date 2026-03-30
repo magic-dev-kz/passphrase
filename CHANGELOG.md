@@ -1,5 +1,10 @@
 # Changelog
 
+## v19.0 (2026-03-29) — Error Handling Hardening
+
+- **Empty wordlist guard**: If word list file fails to load, show clear error instead of generating broken password
+- SW cache bumped to `passphrase-v19.0`
+
 ## v18.0 (2026-03-29) — SEO / Meta Pass
 
 - **theme-color**: Added `<meta name="theme-color" content="#7C5CFC">`

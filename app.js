@@ -249,6 +249,12 @@
       case 'classic': currentPassword = generateClassic(); break;
       case 'pin': currentPassword = generatePin(); break;
     }
+    // v19: Empty wordlist guard
+    if (currentPassword === 'error-empty-dictionary') {
+      var $out = $('#output');
+      if ($out) $out.textContent = 'Word list failed to load. Please reload the page.';
+      return;
+    }
     playGenerateClick(); // v12: soft click sound
     typePassword(currentPassword);
     triggerDisplayFlash();
