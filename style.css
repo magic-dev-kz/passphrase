@@ -6,7 +6,7 @@
 /* v9: VISUAL IDENTITY — security color system, shield glow, generate animation, glassmorphism cards */
 /* v12: generate click sound, password length recommendation, entropy visualization */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+/* Google Fonts loaded via preload in index.html */
 
 /* === Dark theme (default) — deep security gradient === */
 :root {

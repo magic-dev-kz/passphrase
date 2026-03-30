@@ -1,5 +1,12 @@
 # Changelog
 
+
+## v23.0 (2026-03-29) — Deferred Font Loading
+
+- **Non-blocking Google Fonts**: Font CSS in both `index.html` and `style.css` changed from render-blocking `<link>` / `@import` to `<link rel="preload" ... onload>` with `<noscript>` fallback — improves First Contentful Paint
+- SW cache bumped to `passphrase-v23.0`
+
+---
 ## v22.0 (2026-03-29) — Have I Been Pwned Breach Check
 
 - **HIBP API integration**: Real breach check using the Have I Been Pwned `range` API with k-anonymity — only 5 characters of the SHA-1 hash prefix are sent, the full password never leaves the browser
