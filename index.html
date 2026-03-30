@@ -133,6 +133,21 @@
     <span class="breach-warning__text" id="breach-warning-text">This password matches common breach patterns</span>
   </div>
 
+  <!-- v22: HIBP Breach Check -->
+  <div class="hibp-section" id="hibp-section">
+    <div class="hibp-result hidden" id="hibp-result" role="status" aria-live="polite">
+      <span class="hibp-result__text" id="hibp-result-text"></span>
+      <div class="hibp-spinner" aria-hidden="true"></div>
+    </div>
+    <div class="hibp-actions">
+      <button class="btn btn--hibp" id="btn-hibp-check" aria-label="Check password against known data breaches">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        Check Breaches
+      </button>
+      <span class="hibp-privacy-note" id="hibp-privacy-note">Only 5 characters of the hash are sent &mdash; your password never leaves your browser</span>
+    </div>
+  </div>
+
   <!-- Action buttons -->
   <div class="actions">
     <button class="btn btn--primary" id="btn-generate" aria-label="Generate new password">

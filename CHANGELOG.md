@@ -1,5 +1,19 @@
 # Changelog
 
+## v22.0 (2026-03-29) — Have I Been Pwned Breach Check
+
+- **HIBP API integration**: Real breach check using the Have I Been Pwned `range` API with k-anonymity — only 5 characters of the SHA-1 hash prefix are sent, the full password never leaves the browser
+- **Auto-check on generate**: Every generated password is automatically checked against the HIBP breach database
+- **Manual "Check Breaches" button**: Dedicated button to re-check at any time, with loading spinner during API call
+- **Result states**: Red card with breach count if found, green card if safe, orange fallback to pattern-based check if offline/error
+- **Privacy note**: Visible text explaining the k-anonymity approach
+- SW cache bumped to `passphrase-v22.0`
+
+## v21.0 (2026-03-29) — Password History Export
+
+- **Password history export**: "Export .txt" button in the history panel downloads the session's password history as a formatted text file with password, mode, and timestamp per entry; file named with current date; button injected next to the "Clear" button
+- SW cache bumped to `passphrase-v21.0`
+
 ## v20.0 (2026-03-29) — Print Styles
 
 - **Print stylesheet**: `@media print` rules — hides header, tabs, shield, history panel, settings (security-conscious); shows only current password + strength meter; white bg, black text

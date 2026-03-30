@@ -1,5 +1,5 @@
 /**
- * PassPhrase v15 — Password Generator
+ * PassPhrase v22 — Password Generator
  * OpenClaw 2026
  * Uses crypto.getRandomValues() for secure generation
  * v6: generate unlock animation, copy glow, crossfade tabs
@@ -8,6 +8,7 @@
  * v9: VISUAL IDENTITY — generate animation, copy pulse, shield glow
  * v12: generate click sound, password length recommendation, entropy visualization
  * v13: password aging warning — shows time since generation, yellow after 5min, red after 30min
+ * v22: Have I Been Pwned API breach check via k-anonymity
  */
 (function () {
   'use strict';
@@ -267,6 +268,7 @@
     updateCrackEstimate(currentPassword); // v8
     updateEntropyChart(currentPassword); // v12: entropy visualization
     startPasswordAgeTimer(); // v13: password aging warning
+    checkHIBP(currentPassword); // v22: auto-check HIBP
     addToHistory(currentPassword);
     if (typeof saveSettings === 'function') saveSettings(); // v7: persist settings
   }
@@ -567,6 +569,88 @@
     } else {
       $warning.classList.add('hidden');
     }
+  }
+
+  // === v22: Have I Been Pwned API Breach Check (k-anonymity) ===
+  async function sha1Hash(text) {
+    var encoder = new TextEncoder();
+    var data = encoder.encode(text);
+    var hashBuffer = await crypto.subtle.digest('SHA-1', data);
+    var hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('').toUpperCase();
+  }
+
+  async function checkHIBP(password) {
+    var $result = document.getElementById('hibp-result');
+    var $resultText = document.getElementById('hibp-result-text');
+    var $resultNote = document.getElementById('hibp-privacy-note');
+    var $btn = document.getElementById('btn-hibp-check');
+    if (!$result || !$resultText || !$btn) return;
+
+    // Show loading state
+    $btn.disabled = true;
+    $btn.classList.add('btn--loading');
+    $result.className = 'hibp-result hibp-result--loading';
+    $result.classList.remove('hidden');
+    $resultText.textContent = 'Checking breaches...';
+    if ($resultNote) $resultNote.classList.remove('hidden');
+
+    try {
+      var hash = await sha1Hash(password);
+      var prefix = hash.substring(0, 5);
+      var suffix = hash.substring(5);
+
+      var response = await fetch('https://api.pwnedpasswords.com/range/' + prefix, {
+        headers: { 'Add-Padding': 'true' }
+      });
+
+      if (!response.ok) {
+        throw new Error('API returned ' + response.status);
+      }
+
+      var text = await response.text();
+      var lines = text.split('\n');
+      var found = 0;
+
+      for (var i = 0; i < lines.length; i++) {
+        var parts = lines[i].split(':');
+        if (parts[0] && parts[0].trim() === suffix) {
+          found = parseInt(parts[1].trim(), 10) || 1;
+          break;
+        }
+      }
+
+      if (found > 0) {
+        $result.className = 'hibp-result hibp-result--danger';
+        $resultText.innerHTML = '\u26a0\ufe0f This password appeared in <strong>' + found.toLocaleString() + '</strong> data breach' + (found !== 1 ? 'es' : '') + '!';
+      } else {
+        $result.className = 'hibp-result hibp-result--safe';
+        $resultText.textContent = '\u2705 Not found in known breaches';
+      }
+    } catch (e) {
+      // Offline or error — fall back to pattern check
+      var warnings = checkBreachPatterns(password);
+      if (warnings.length > 0) {
+        $result.className = 'hibp-result hibp-result--danger';
+        $resultText.textContent = '\u26a0\ufe0f Offline check: ' + warnings[0];
+      } else {
+        $result.className = 'hibp-result hibp-result--info';
+        $resultText.textContent = '\u26a0\ufe0f Could not reach breach database. Pattern check passed.';
+      }
+    } finally {
+      $btn.disabled = false;
+      $btn.classList.remove('btn--loading');
+    }
+  }
+
+  function initHIBPCheck() {
+    var $btn = document.getElementById('btn-hibp-check');
+    if (!$btn) return;
+    $btn.addEventListener('click', function() {
+      if (currentPassword) {
+        checkHIBP(currentPassword);
+      }
+    });
   }
 
   // === Password Score Badge ===
@@ -1456,6 +1540,45 @@
     $confirmNo.addEventListener('click', cancelClearHistory);
     $('#confirm-backdrop').addEventListener('click', cancelClearHistory);
 
+    // v21: Password history export — inject export button next to clear
+    (function initHistoryExport() {
+      var exportBtn = document.createElement('button');
+      exportBtn.id = 'history-export';
+      exportBtn.className = ($historyClear ? $historyClear.className : '') || '';
+      exportBtn.textContent = 'Export .txt';
+      exportBtn.setAttribute('aria-label', 'Export password history as text file');
+      exportBtn.style.cssText = 'margin-right:8px;';
+      if ($historyClear && $historyClear.parentNode) {
+        $historyClear.parentNode.insertBefore(exportBtn, $historyClear);
+      }
+      exportBtn.addEventListener('click', function() {
+        if (history.length === 0) return;
+        var lines = ['PassPhrase — Password History Export', 'Exported: ' + new Date().toLocaleString(), '---', ''];
+        history.forEach(function(item, i) {
+          lines.push((i + 1) + '. ' + item.password);
+          lines.push('   Mode: ' + (item.mode || 'unknown') + '  |  Generated: ' + new Date(item.date).toLocaleString());
+          lines.push('');
+        });
+        lines.push('---');
+        lines.push('Total: ' + history.length + ' passwords');
+        var text = lines.join('\n');
+        try {
+          var blob = new Blob([text], { type: 'text/plain' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'passphrase-history-' + new Date().toISOString().slice(0, 10) + '.txt';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('History exported!');
+        } catch (e) {
+          showToast('Export failed');
+        }
+      });
+    })();
+
     // Keyboard
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -1662,6 +1785,7 @@
     initPinSettings();
     initCustomWords();
     initChecker();
+    initHIBPCheck(); // v22
     bindEvents();
     initPWAInstallBanner();
     generate(); // AC-1: auto-generate on open
